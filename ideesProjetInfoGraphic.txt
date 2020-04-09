@@ -1,0 +1,13 @@
+Controler un bras/bonhomme qui tient une lampe et éclaire un mur.
+- Graphe de scene : bras/bonhomme
+- Lumière : lampe (directionnel avec le pointeur de la souris par ex.)
+- Texture : mur (en brique par exemple)
+- Bonus : faire une vitre dans le mur qui reflète ou laisse passer la lumière
+
+Scene d'Interstellar : visite de la planète Miller.
+https://fr.wikipedia.org/wiki/Interstellar#La_visite_de_la_premi%C3%A8re_plan%C3%A8te
+Pt de vue : https://youtu.be/v7OVqXm7_Pk?t=66
+- Graphe de scene : TARS quand il "roule" https://youtu.be/v7OVqXm7_Pk?t=182
+- Lumière : lumière ambiente venant du ciel
+- Texture : sol avec une texture d'eau/mer
+- Bonus : Diriger TARS avec clavier
