@@ -1,9 +1,16 @@
-Controler un bras/bonhomme qui tient une lampe et éclaire un mur.
+Sujet sélectionné :
+Controler le bras d'un bonhomme qui tient une lampe et éclaire un mur.
+Pt de vue : déplacement/vision type FPS
 - Graphe de scene : bras/bonhomme
 - Lumière : lampe (directionnel avec le pointeur de la souris par ex.)
-- Texture : mur (en brique par exemple)
-- Bonus : faire une vitre dans le mur qui reflète ou laisse passer la lumière
+- Texture : mur (en brique ou en bois par exemple)
+- Bonus :
+	- faire une vitre dans le mur qui reflète ou laisse passer la lumière
+	- importer un modèle 3D pour modéliser la lampe
+	- allumer/éteindre la lampe avec clic gauche
 
+
+Sujet écarté :
 Scene d'Interstellar : visite de la planète Miller.
 https://fr.wikipedia.org/wiki/Interstellar#La_visite_de_la_premi%C3%A8re_plan%C3%A8te
 Pt de vue : https://youtu.be/v7OVqXm7_Pk?t=66

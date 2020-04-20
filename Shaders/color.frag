@@ -19,26 +19,15 @@ varying vec3 varyNormal;
 
 void main()
 {
-    // vec4 color;
 
 	vec3 L = normalize(uLightPosition - varyPosition.xyz);
 	vec3 V = normalize(uCameraPosition - varyPosition.xyz);
 	
-	// vec3 N = normalize(varyNormal);
 
 	vec3 ambient 	= uK.x * uColor * uLightColor;
-	// vec3 diffuse 	= uK.y * uColor * uLightColor * max(0.0, dot(N, L));
 	vec3 diffuse 	= uK.y * uColor * uLightColor * max(0.0, dot(varyNormal, L));
 	
-	// vec3 specular 	= uK.z * (pow(max(0.0, dot(reflect(N, -L), -V)), uK.w)) * uLightColor;
 	vec3 specular 	= uK.z * (pow(max(0.0, dot(reflect(-L, varyNormal), V)), uK.w)) * uLightColor;
-
-    // gl_FragColor = varyColor;
-    // gl_FragColor = ambient + diffuse + specular;
-
-    // vec3 res 	 = uColor * (ambient + diffuse + specular);
-    // gl_FragColor = vec4(res, 1.0);
-    // gl_FragColor = vec4(min(vec3(1.0, 1.0, 1.0), ambient + diffuse + specular), 1.0);
 
     vec4 texture = texture2D(uTexture, vary_UV);
 	vec4 lighting = vec4(min(vec3(1.0, 1.0, 1.0), ambient + diffuse + specular), 1.0);

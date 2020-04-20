@@ -18,16 +18,11 @@ varying vec2 vary_UV;
 
 void main()
 {
-	// gl_Position = uMvp * vec4(vPosition, 1.0);
-    // varyColor = vec4((vColor+1.0)/2.0, 1.0);
-
     gl_Position = uMvp * vec4(vPosition, 1.0);
     vary_UV     = -vUV + vec2(1.0, 0.0);
 
     varyNormal = normalize(transpose(inverse(mat3(uModelView))) * vNormal);
-    
-    // vec4 worldPos = uModelView * vec4(vPosition, 1.0);
-    
+        
     varyPosition = uModelView * vec4(vPosition, 1.0);
     varyPosition /= varyPosition.w;
 }

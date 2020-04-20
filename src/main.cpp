@@ -319,11 +319,11 @@ int main(int argc, char *argv[])
     }
 
 
-
+	
 	// Lumiere/Mat :
 	Material material = Material();
-	Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
+	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
+	Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(255.0f, 211.0f, 1.0f));	//yellow light
 
 
 	//////////////////////////////////////////////////////////////////////////////////////FIN_PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
@@ -501,20 +501,18 @@ int main(int argc, char *argv[])
 		//We generate our buffer
 		GLuint bgBuffer;
 		glGenBuffers(1, &bgBuffer);
+			//We fill this buffer as a GL_ARRAY_BUFFER (buffer containing vertices (points) information).
+			//Remind to close this buffer for not misusing it(glBindBuffer(GL_ARRAY_BUFFER, 0);)
+			glBindBuffer(GL_ARRAY_BUFFER, bgBuffer);
+			//2 coordinates per UV, 3 per normal and 3 per position. We do not yet copy these data (hence the NULL)
+			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW);
 
-		//We fill this buffer as a GL_ARRAY_BUFFER (buffer containing vertices (points) information).
-		//Remind to close this buffer for not misusing it(glBindBuffer(GL_ARRAY_BUFFER, 0);)
-		glBindBuffer(GL_ARRAY_BUFFER, bgBuffer);
-		//2 coordinates per UV, 3 per normal and 3 per position. We do not yet copy these data (hence the NULL)
-		glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW);
-
-		//Copy one by one the data (first positions, then normals and finally UV).
-		//We remind that we do not necessarily need all of these variables, and that other variables may be needed for your usecase
-		//parameters : Target, buffer offset, size to copy, CPU data.
-		//We consider that each data are typed « float* » with sizeof(float)*nbVertices*nbCoordinate bytes where nbCoordinate = 2 or 3 following the number of components per value for this variable
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, position);
-		glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbVertices, 3 * sizeof(float)*nbVertices, color);
-
+			//Copy one by one the data (first positions, then normals and finally UV).
+			//We remind that we do not necessarily need all of these variables, and that other variables may be needed for your usecase
+			//parameters : Target, buffer offset, size to copy, CPU data.
+			//We consider that each data are typed « float* » with sizeof(float)*nbVertices*nbCoordinate bytes where nbCoordinate = 2 or 3 following the number of components per value for this variable
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, position);
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbVertices, 3 * sizeof(float)*nbVertices, color);
 		glBindBuffer(GL_ARRAY_BUFFER, 0); //Close the buffer
 
 

@@ -6,7 +6,7 @@ Polytech ET3 IT - Noted project for S6
 
 Implement the different topics seen in class/TPs :
 
-1. Introduction, scan conversion (lines, circles)
+1. Scan conversion (lines, circles)
 2. 2D/3D transformations, 3D object representations
 3. Viewing/projections, hidden surface removal
 4. Illumination, shading, texture mapping
@@ -29,7 +29,7 @@ Things you need to install the project :
 Here are some instructions on how to get the development env running.
 
 First, clone this repository with the following command :
-`git clone https://github.com/adepreis/ProjectName`
+`git clone https://github.com/adepreis/ComputerGraphicProject`
 
 
 Then, *using cmake-gui* :
@@ -37,29 +37,46 @@ Then, *using cmake-gui* :
 You have to give cmake where the source code is, for example :
 
 ```
-D:\...\ProjectFolder\ProjectName
+D:\...\ProjectFolder\ComputerGraphicProject
 ```
 
 Then where to build the binaries, here in the corresponding path :
 
 ```
-D:\...\ProjectFolder\ProjectName\build
+D:\...\ProjectFolder\ComputerGraphicProject\build
 ```
 
 Then click 'Configure' twice : the first time you'll have to specify the 2017 version of Visual Studio.
 Once the configuration is done, click on the 'Generate' button.
-You will now find the `/build` folder in your project. Just execute the `ProjectName.sln` in it in order to open the Visual Studio environment.
+You will now find the `/build` folder in your project. Just execute the `ComputerGraphicProject.sln` in it in order to open the Visual Studio environment.
 
 Get a coffee.
 
 ### Now, VS is fully loaded
-In Solution Explorer, choose the solution node's context (right-click on ProjectName) menu and then choose 'Set as StartUp Project'.
+In Solution Explorer, choose the solution node's context (right-click on ComputerGraphicProject) menu and then choose 'Set as StartUp Project'.
 
 For first time use, you will have to make sure that in **'Debug' tab > 'Properties' > 'Debugging'**, the **'Working Directory'** is currently `$(ProjectDir)/bin`.
 
-Now you could run the project after clicking the 'Start' button. There you are!
+Now you could run the project after clicking the 'Start' button.
+**(No additional parameters if you use the command line)**
+
+There you are!
 
 > ~~Note : Textures have to be in the `/build/bin/Images` folder !~~
+
+
+---
+
+## Commands :
+No controller needed, only a keyboard and a mouse.
+
+To interact with our poject, the keys to use are :
+- `z` : move forward
+- `s` : move backward
+- `q` : move sideways to the left
+- `d` : move sideways to the right
+- `Left Click` on the mouse to turn on/off the flashlight
+- You control the arm with your mouse cursor
 
 ---
 
@@ -77,12 +94,10 @@ Now you could run the project after clicking the 'Start' button. There you are!
 
 ---
 
-## Acknowledgments
+## Acknowledgments / Inspiration
 
 * [Tobias isenberg](http://tobias.isenberg.cc/) - computer graphics instructor
 * Mickaël Sereno - PhD student in charge of computer graphics TPs
 * SDL 2.0 Library [wiki](https://wiki.libsdl.org/)
 * [Tutoriel : Charger un modèle 3D](http://www.opengl-tutorial.org/fr/beginners-tutorials/tutorial-7-model-loading/)
 * [thebookofshaders](https://thebookofshaders.com/)
-* Inspiration
-* etc

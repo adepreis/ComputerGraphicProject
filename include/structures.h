@@ -11,6 +11,12 @@ struct Material
 	float ka = 0.5f;
 	float ks = 1.0f;
 	float alpha = 500.0f;
+
+	Material() {}
+
+	Material(glm::vec3 c) {
+		color = c;
+	}
 };
 
 struct Light
