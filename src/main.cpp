@@ -180,7 +180,8 @@ int main(int argc, char *argv[])
 	Sphere shoulder1(32, 32);
 	listeFigures.push_back(shoulder1);
 	listeBuffer.push_back(generate(shoulder1));
-	glm::mat4 shoulder1Matrix = getMatrix(-0.32, 0, 0.3, -M_PI/6.f, 1, 0, 0);
+	// glm::mat4 shoulder1Matrix = getMatrix(-0.32, 0, 0.3, -M_PI / 6.f, 1, 0, 0); // default : bras le long du corps
+	glm::mat4 shoulder1Matrix = getMatrix(-0.32, 0, 0.3, 1.f, 1, 0, 0);			   // inclinaison initiale de 57deg (1rad)
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix);
 
 	Cylinder arm1(32);
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
 	Sphere elbow1(32, 32);
 	listeFigures.push_back(elbow1);
 	listeBuffer.push_back(generate(elbow1));
-	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.f, 1, 0, 0);
+	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.5f, 1, 0, 0);				// légère inclinaison supplémentaire
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix);
 
 	Cylinder forearm1(32);
@@ -323,9 +324,17 @@ int main(int argc, char *argv[])
 	// Lumiere/Mat :
 	Material material = Material();
 
+	// on se sert des 3 premieres dimensions de cette matrice pour calculer
+	// la position de la lumière au bout du bras (de la lampe prochainement)
+	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
+	tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
+
+	glm::vec3 lightPos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
+
 	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
-	Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
+	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
+	Light light = Light(lightPos, lightColorBase);	//position custom
 
 
 	//////////////////////////////////////////////////////////////////////////////////////FIN_PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
@@ -338,9 +347,9 @@ int main(int argc, char *argv[])
 	int side = 1; //pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
 	int timer = 60; //temps avant le changement de sens de rotation, en tours de boucle
 
-	int amplitudeArmUD = 0; //pour limiter rotation du bras en y ; compris dans [0,100]
-	int amplitudeArmLR = 0; //pour limiter rotation du bras en x ; compris dans [0,100]
+	int amplitudeArmLR, amplitudeArmUD = 50; //pour limiter rotation du bras en x et en y ; compris dans [0,100]
 
+	displayCommands();
 
     //Main application loop
     while(isOpened)
@@ -348,21 +357,15 @@ int main(int argc, char *argv[])
         //Time in ms telling us when this frame started. Useful for keeping a fix framerate
         uint32_t timeBegin = SDL_GetTicks();
 
-		int armDirectionUD = 0; //pour changer dir haut/bas du bras ; inclus dans {-1, 0, 1}
-		int armDirectionLR = 0; //pour changer dir gauche/droite du bras ; inclus dans {-1, 0, 1}
+		//pour changer dir gauche/droite et haut/bas du bras ; inclus dans {-1, 0, 1}
+		int armDirectionLR, armDirectionUD = 0;
 
         //Fetch the SDL events
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
 			// Allume/éteint la lumière au clic (prochainement la lampe torche)
-			if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
-			{
-				light.color = lightColorBase;
-			}
-			else {
-				light.color = glm::vec3(0.f, 0.f, 0.f);
-			}
+			if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) { light.toogle(); }
 
             switch(event.type)
             {
@@ -407,6 +410,7 @@ int main(int argc, char *argv[])
 							light.pos += glm::vec3(0.f, -0.1f, 0.f);	// deplace lumière en bas
 							break;
 
+
 						/* TODO: Adjust to a "global scene zoom" (see glm::perspective or glm::lookAt..) */
 						case SDLK_KP_PLUS:
 							cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.0f, 0.1f));
@@ -435,23 +439,21 @@ int main(int argc, char *argv[])
 						}
 						printf("amplitudeArmLR : %d.\n", amplitudeArmLR);
 					}*/
-					if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
+					if (event.motion.yrel <= 0)
 					{
-						if (event.motion.yrel <= 0)
-						{
-							if (amplitudeArmUD < 100) {
-								armDirectionUD = 1;
-								amplitudeArmUD++;
-							}
+						if (amplitudeArmUD < 100) {
+							armDirectionUD = 1;
+							amplitudeArmUD++;
 						}
-						else {
-							if (amplitudeArmUD > 0) {
-								armDirectionUD = -1;
-								amplitudeArmUD--;
-							}
-						}
-						printf("amplitudeArmUD : %d.\n", amplitudeArmUD);
 					}
+					else {
+						if (amplitudeArmUD > 0) {
+							armDirectionUD = -1;
+							amplitudeArmUD--;
+						}
+					}
+					//printf("amplitudeArmUD : %d.\n", amplitudeArmUD);
+					// printf("x=%d, y=%d.\n", event.motion.x, event.motion.y);
 					break;
             }
         }
@@ -477,7 +479,11 @@ int main(int argc, char *argv[])
 
 
 
-		//Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-même
+		/*
+			Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-même
+
+			NOTE : Utile plus tard pour le déplacement du personnage ?
+		 */
 		//glm::mat4 bodyMatrixRot = glm::rotate(headMatrix, (t++) / 60.0f, glm::vec3(0, 0, 1));
 		//bodyMatrix = bodyMatrix * bodyMatrixRot;
 
@@ -498,6 +504,12 @@ int main(int argc, char *argv[])
 		listeMvp[4] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix;
 		listeMvp[5] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix;
 
+
+		// Ici futur emplacement de la lampe
+		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
+		light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
+
+
 		// BRAS GAUCHE (AU REPOS)
 		// shoulder2Matrix = glm::rotate(shoulder2Matrix, -side * (float)M_PI / 240.f, glm::vec3(1, 0, 0));
 		listeMvp[6] = cameraMatrix * bodyMatrix * shoulder2Matrix;
@@ -507,6 +519,10 @@ int main(int argc, char *argv[])
 		listeMvp[9] = cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix;
 
 		// Bas du corps
+		/*
+			TODO : Conditionner le mouvement des jambes à l'avancement du personnage
+					(une fois que le déplacement du personnage sera géré)
+		 */
 		thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[10] = cameraMatrix * bodyMatrix * thigh1Matrix;
 		knee1Matrix = glm::rotate(knee1Matrix, -side * (float) M_PI / 540.f, glm::vec3(1, 0, 0));

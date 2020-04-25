@@ -117,3 +117,18 @@ void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material mat
 	//glDrawArrays(GL_TRIANGLES, 0, g.getNbVertices());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+void displayCommands()
+{
+	/*
+		To interact with our poject, the keys to use are :
+		- `z` : move forward
+		- `s` : move backward
+		- `q` : move sideways to the left
+		- `d` : move sideways to the right
+	*/
+	printf("COMMANDS :\n");
+	printf("========================================================\n");
+	printf("Control the arm with your mouse cursor\n");
+	printf("`Left Click` on the mouse to turn on/off the flashlight");
+}

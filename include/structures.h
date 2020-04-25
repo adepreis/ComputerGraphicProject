@@ -27,9 +27,26 @@ public:
 
 	glm::vec3 color;
 
+	glm::vec3 defaultColor;
+
+	bool lightIsOn = true;
+
 	Light(glm::vec3 p, glm::vec3 c) {
 		pos = p;
 		color = c;
+		defaultColor = c;
+	}
+
+	void toogle()
+	{
+		if (lightIsOn) {
+			color = glm::vec3(0.f, 0.f, 0.f);
+			lightIsOn = false;
+		}
+		else {
+			color = defaultColor;
+			lightIsOn = true;
+		}
 	}
 };
 

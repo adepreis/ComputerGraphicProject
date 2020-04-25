@@ -63,6 +63,7 @@ Now you could run the project after clicking the 'Start' button.
 There you are!
 
 > ~~Note : Textures have to be in the `/build/bin/Images` folder !~~
+> ~~Note : Objects have to be in the `/build/bin/Models` folder !~~
 
 
 ---
@@ -70,7 +71,7 @@ There you are!
 ## Commands :
 No controller needed, only a keyboard and a mouse.
 
-To interact with our poject, the keys to use are :
+To interact with our project, the keys to use are :
 - `z` : move forward
 - `s` : move backward
 - `q` : move sideways to the left
