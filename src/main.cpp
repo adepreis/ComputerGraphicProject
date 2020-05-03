@@ -19,6 +19,7 @@
 
 #include "functions.h"
 #include "structures.h"
+#include "OBJLoader.h"
 
 // objects 3D
 #include "Sphere.h"
@@ -30,8 +31,8 @@
 #include "math.h"
 
 //On définit une fenêtre carrée pour éviter tout problème de rotation ou scaling.
-#define WIDTH     800
-#define HEIGHT    800
+#define WIDTH     700
+#define HEIGHT    700
 #define FRAMERATE 60
 #define TIME_PER_FRAME_MS  (1.0f/FRAMERATE * 1e3)
 #define INDICE_TO_PTR(x) ((void*)(x))
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
 	}
 
     //Create a Window
-    SDL_Window* window = SDL_CreateWindow("VR Camera - Projet InfoGraphique",                           //Titre
+    SDL_Window* window = SDL_CreateWindow("FPS Flashlight - Projet Info Graphique",		//Titre
                                           SDL_WINDOWPOS_UNDEFINED,               //X Position
                                           SDL_WINDOWPOS_UNDEFINED,               //Y Position
                                           WIDTH, HEIGHT,                         //Resolution
@@ -295,13 +296,9 @@ int main(int argc, char *argv[])
 	listeMvp[16] = listeMvp[16] * scaleMatrix(0.15, 0.15, 0.38);
 	listeMvp[17] = listeMvp[17] * scaleMatrix(0.2, 0.4, 0.2);
 
-	/* class Forearm : public Cylinder
-    {
-
-    };*/
 
     //From here you can load your OpenGL objects, like VBO, Shaders, etc.
-    //TODO
+    
 	//On charge les fichiers relatifs aux shaders
     FILE* vertFile = fopen("Shaders/color.vert", "r");
     FILE* fragFile = fopen("Shaders/color.frag", "r");
@@ -310,16 +307,35 @@ int main(int argc, char *argv[])
     }
     Shader* shader = Shader::loadFromFiles(vertFile, fragFile);
 
-
     fclose(vertFile);
     fclose(fragFile);
+
     if (shader == NULL)
     {
 		ERROR("Cannot build Shader...\n");
 		return EXIT_FAILURE;
     }
 
+	/////////// Flashlight model loading ///////////////
 
+
+	std::vector<glm::vec3> flashlight_vertices;
+	std::vector<glm::vec2> flashlight_uvs;
+	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
+
+
+	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
+	// bool resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	
+	/* This model is just a test model adapted to our parser : */
+	// bool resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	
+	/* This one is a adapted model using Blender : */
+	bool resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+
+
+
+	//////////////////////////
 	
 	// Lumiere/Mat :
 	Material material = Material();
@@ -558,16 +574,16 @@ int main(int argc, char *argv[])
 		listeMvp[17] = listeMvp[17] * scaleMatrix(0.2, 0.4, 0.2);
 
 
-		int nbVertices = 3;
+		uint32_t nbBgVertices = 3;
 
-		float position[] = {
+		float bgPosition[] = {
 			-1.0f, -1.0f, 0.8f,		// leftDown
 			 1.0f, -1.0f, 0.8f,		// rightDown
 			-1.0f,  1.0f, 0.8f		// up
 		};
 
 
-		float color[] = { +1.0f, 0.0f, 0.0f,
+		float bgColor[] = { +1.0f, 0.0f, 0.0f,
 							0.0f, 1.0f, 0.0f,
 							0.0f, 0.0f, +1.0f };
 
@@ -578,14 +594,14 @@ int main(int argc, char *argv[])
 			//Remind to close this buffer for not misusing it(glBindBuffer(GL_ARRAY_BUFFER, 0);)
 			glBindBuffer(GL_ARRAY_BUFFER, bgBuffer);
 			//2 coordinates per UV, 3 per normal and 3 per position. We do not yet copy these data (hence the NULL)
-			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbBgVertices, NULL, GL_DYNAMIC_DRAW);
 
 			//Copy one by one the data (first positions, then normals and finally UV).
 			//We remind that we do not necessarily need all of these variables, and that other variables may be needed for your usecase
 			//parameters : Target, buffer offset, size to copy, CPU data.
-			//We consider that each data are typed « float* » with sizeof(float)*nbVertices*nbCoordinate bytes where nbCoordinate = 2 or 3 following the number of components per value for this variable
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, position);
-			glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbVertices, 3 * sizeof(float)*nbVertices, color);
+			//We consider that each data are typed « float* » with sizeof(float)*nbBgVertices*nbCoordinate bytes where nbCoordinate = 2 or 3 following the number of components per value for this variable
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgPosition);
+			glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgColor);
 		glBindBuffer(GL_ARRAY_BUFFER, 0); //Close the buffer
 
 
@@ -611,6 +627,20 @@ int main(int argc, char *argv[])
 		glEnd();
 
 
+
+		//We generate our flashlight buffer
+		GLuint torchBuffer;
+		glGenBuffers(1, &torchBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, torchBuffer);
+//			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbBgVertices, NULL, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, flashlight_vertices.size() * sizeof(glm::vec3), &flashlight_vertices[0], GL_STATIC_DRAW);
+
+			/* Est cela qui empêche reflet lumière et texture ??? */
+			// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgPosition);
+			// glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgColor);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
 		// test floor
 		/*glBegin(GL_TRIANGLES);
 			glVertex3f(0.5, 0.0, 0.0);
@@ -632,7 +662,32 @@ int main(int argc, char *argv[])
 			{
 				try
 				{
-					draw(listeBuffer[i], listeFigures[i], shader, listeMvp[i], material, light, textureID);
+					draw(listeBuffer[i], listeFigures[i].getNbVertices(), shader, listeMvp[i], material, light, textureID);
+				}
+				catch (...)
+				{
+					return EXIT_FAILURE;
+				}
+			}
+
+
+
+			/* Flashlight */
+			Material torchMat = Material(glm::vec3(1.f, 0.f, 0.0f));	// red to better distinguish it
+
+			// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
+
+			glm::mat4 matrixTorch = scaleMatrix(0.03f, 0.03f, 0.03f);
+			matrixTorch = glm::translate(matrixTorch, glm::vec3(-20.f, -8.f, 0.0f));
+			matrixTorch = glm::rotate(matrixTorch, (float)M_PI, glm::vec3(0, 1, 0));
+			matrixTorch = glm::rotate(matrixTorch, -0.2f, glm::vec3(1, 0, 0));
+
+			glm::mat4 mvpTorch = cameraMatrix * matrixTorch;
+			uint32_t flashlight_verticesNB = flashlight_vertices.size();
+			if (resTorch) {
+				try
+				{
+					draw(torchBuffer, flashlight_verticesNB, shader, mvpTorch, torchMat, light, textureID);
 				}
 				catch (...)
 				{
@@ -642,92 +697,22 @@ int main(int argc, char *argv[])
 
 
 			/* BACKGROUND */
+			// If the background material color is different of 'material' (the one used for
+			// the animated character), the light will not reflect on it... (?)
+			Material bgMat = Material(glm::vec3(0.f, 1.f, 0.f));
 
 			glm::mat4 matrixBackground(1.0f);
 			//matrixBackground = glm::scale(matrixBackground, glm::vec3(2.0f, 2.0f, 2.0f));
 			glm::mat4 mvpBackground = cameraMatrix * matrixBackground;
 
-
-			glBindBuffer(GL_ARRAY_BUFFER, bgBuffer);
-
-
-			//on instancie vPosition, vColor et uMVP pour l'affichage de nos figures
-
-			// Se charge d'envoyer vPosition au vertex :
-			GLint vPosition = glGetAttribLocation(shader->getProgramID(), "vPosition");
-			glVertexAttribPointer(vPosition, 3, GL_FLOAT, 0, 0, 0);
-			//It is here that you ,  select how the Shader reads the VBO. Indeed the 5th parameter is called ,  "stride" : it is the distance in bytes between two values for the same ,  kind or variable. If the values are side-by-side, stride == 0.
-			//Here we ,  need to set to 3*sizeof(float) for the first version of the VBO seen in ,  clasc.
-			glEnableVertexAttribArray(vPosition);   //Enable "vPosition"
-
-			//Work with vColor
-			GLint vColor = glGetAttribLocation(shader->getProgramID(), "vColor");
-			// Colors start at 9*sizeof(float) (3*nbVertices*sizeof(float)) for the second ,  version of the VBO. For the first version of the VBO, both the stride ,  and the offset should be 3*sizeof(float) here
-			glVertexAttribPointer(vColor, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * nbVertices));
-			// Convert an indice to void* : (void*)(x)
-			glEnableVertexAttribArray(vColor);  //Enable"vColor"
-
-			// uMVP
-			GLint uMvp = glGetUniformLocation(shader->getProgramID(), "uMvp");
-			glUniformMatrix4fv(uMvp, 1, GL_FALSE, glm::value_ptr(mvpBackground)); // 1 car une seule matrice 
-
-			// normal
-			GLint vNormal = glGetAttribLocation(shader->getProgramID(), "vNormal");
-			glVertexAttribPointer(vNormal, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * nbVertices));
-			glEnableVertexAttribArray(vNormal); //Enable"vNormal"
-
-
-
-			// modelView
-			GLint uModelView = glGetUniformLocation(shader->getProgramID(), "uModelView");
-			glUniformMatrix4fv(uModelView, 1, GL_FALSE, glm::value_ptr(mvpBackground));
-
-			// uK
-			GLint uK = glGetUniformLocation(shader->getProgramID(), "uK");
-			glUniform4fv(uK, 1, glm::value_ptr(glm::vec4(material.ka, material.kd, material.ks, material.alpha)));
-
-			// uColor
-			GLint uColor = glGetUniformLocation(shader->getProgramID(), "uColor");
-			glUniform3fv(uColor, 1, glm::value_ptr(material.color));// glm::vec3(1.0f, 0.0f, 0.0f)));
-
-			// uLightPosition
-			GLint uLightPosition = glGetUniformLocation(shader->getProgramID(), "uLightPosition");
-			glUniform3fv(uLightPosition, 1, glm::value_ptr(light.pos));
-
-			// uLightCOlor
-			GLint uLightColor = glGetUniformLocation(shader->getProgramID(), "uLightColor");
-			glUniform3fv(uLightColor, 1, glm::value_ptr(light.color));// glm::vec3(1.0f, 1.0f, 1.0f)));
-
-			// uCamPos
-			GLint uCameraPosition = glGetUniformLocation(shader->getProgramID(), "uCameraPosition");
-			glUniform3fv(uCameraPosition, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 0.0f)));//glm::vec3(0.0f, 0.0f, -1.0f)));
-
-
-
-			// vUV
-			GLint vUV = glGetAttribLocation(shader->getProgramID(), "vUV");
-			glVertexAttribPointer(vUV, 2, GL_FLOAT, 0, 0, INDICE_TO_PTR(3 * sizeof(float)*nbVertices));
-			glEnableVertexAttribArray(vUV);
-
-			// uTexture
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, textureID);
-				GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
-				glUniform1i(uTexture, 0);
-				glDrawArrays(GL_TRIANGLES, 0, nbVertices);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-
-
-			//glDrawArrays(GL_TRIANGLES, 0, g.getNbVertices());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-
-
-
-
-
+			try
+			{
+				draw(bgBuffer, nbBgVertices, shader, mvpBackground, bgMat, light, textureID);
+			}
+			catch (...)
+			{
+				return EXIT_FAILURE;
+			}
 
 
 

@@ -23,7 +23,7 @@ glm::mat4 getMatrix(float tx, float ty, float tz, float angle, int x, int y, int
 glm::mat4 scaleMatrix(float sx, float sy, float sz);
 
 //draw permet de dessiner la figure
-void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material material, Light light, GLuint textureID);
+void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Material material, Light light, GLuint textureID);
 
 //affiche (dans le terminal) les touches utiles et leurs fonctions
 void displayCommands();

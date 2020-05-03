@@ -63,6 +63,7 @@ Now you could run the project after clicking the 'Start' button.
 There you are!
 
 > ~~Note : Textures have to be in the `/build/bin/Images` folder !~~
+
 > ~~Note : Objects have to be in the `/build/bin/Models` folder !~~
 
 

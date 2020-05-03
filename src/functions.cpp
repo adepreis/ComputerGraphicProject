@@ -41,7 +41,7 @@ glm::mat4 scaleMatrix(float sx, float sy, float sz)
 }
 
 //draw permet de dessiner la figure
-void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material material, Light light, GLuint textureID)
+void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Material material, Light light, GLuint textureID)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
@@ -58,7 +58,7 @@ void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material mat
 	//Work with vColor
 	GLint vColor = glGetAttribLocation(shader->getProgramID(), "vColor");
 	// Colors start at 9*sizeof(float) (3*nbVertices*sizeof(float)) for the second ,  version of the VBO. For the first version of the VBO, both the stride ,  and the offset should be 3*sizeof(float) here
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * g.getNbVertices()));
+	glVertexAttribPointer(vColor, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * figVertices));
 	// Convert an indice to void* : (void*)(x)
 	glEnableVertexAttribArray(vColor);  //Enable"vColor"
 
@@ -68,7 +68,7 @@ void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material mat
 
 	// normal
 	GLint vNormal = glGetAttribLocation(shader->getProgramID(), "vNormal");
-	glVertexAttribPointer(vNormal, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * g.getNbVertices()));
+	glVertexAttribPointer(vNormal, 3, GL_FLOAT, 0, 0, INDICE_TO_PTR(sizeof(float) * 3 * figVertices));
 	glEnableVertexAttribArray(vNormal); //Enable"vNormal"
 
 
@@ -101,7 +101,7 @@ void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material mat
 
 	// vUV
 	GLint vUV = glGetAttribLocation(shader->getProgramID(), "vUV");
-	glVertexAttribPointer(vUV, 2, GL_FLOAT, 0, 0, INDICE_TO_PTR(3 * sizeof(float)*g.getNbVertices()));
+	glVertexAttribPointer(vUV, 2, GL_FLOAT, 0, 0, INDICE_TO_PTR(3 * sizeof(float)*figVertices));
 	glEnableVertexAttribArray(vUV);
 
 	// uTexture
@@ -109,12 +109,12 @@ void draw(GLuint buffer, Geometry g, Shader* shader, glm::mat4 mvp, Material mat
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
 	glUniform1i(uTexture, 0);
-	glDrawArrays(GL_TRIANGLES, 0, g.getNbVertices());
+	glDrawArrays(GL_TRIANGLES, 0, figVertices);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
-	//glDrawArrays(GL_TRIANGLES, 0, g.getNbVertices());
+	//glDrawArrays(GL_TRIANGLES, 0, figVertices);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
