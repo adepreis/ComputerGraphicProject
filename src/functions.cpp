@@ -8,16 +8,26 @@ GLuint generate(Geometry g)
 	const float* normals = g.getNormals(); //Get the normal vectors
 	int nbVertices = g.getNbVertices();
 
-	GLuint buffer;
+	GLuint buffer = NULL;	// initialized at 0 to avoid runtime error due to uninitialized buffer
+
+	return createBuffer(buffer, data, normals, nbVertices);
+}
+
+
+//La méthode createBuffer() permet d'instancier n'importe quel buffer
+GLuint createBuffer(GLuint buffer, const float* vertices, const float* normals, int nbVertices)
+{
 	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW); // 3 pour les coordonnees , 3 pour la couleur
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, data);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 3 * nbVertices, 3 * sizeof(float)*nbVertices, normals);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW); // 3 pour les coordonnees , 3 pour la couleur
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, vertices);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 3 * nbVertices, 3 * sizeof(float)*nbVertices, normals);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return buffer;
 }
+
+
 
 //getMatrix() permet d'effectuer une translation de tx en x, ty en y, tz en z et effectuer une rotation de angle radians autours de l'axe dont la valeur vaut 1
 glm::mat4 getMatrix(float tx, float ty, float tz, float angle, int x, int y, int z)

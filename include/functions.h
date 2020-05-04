@@ -16,6 +16,9 @@
 //La méthode generate() permet d'instancier le buffer associé à une figure et le récupérer
 GLuint generate(Geometry g);
 
+//La méthode createBuffer() permet d'instancier n'importe quel buffer
+GLuint createBuffer(GLuint buffer, const float* vertices, const float* normals, int nbVertices);
+
 //getMatrix() permet d'effectuer une translation de tx en x, ty en y, tz en z et effectuer une rotation de angle radians autours de l'axe dont la valeur vaut 1
 glm::mat4 getMatrix(float tx, float ty, float tz, float angle, int x, int y, int z);
 

@@ -148,23 +148,99 @@ int main(int argc, char *argv[])
 	//on instancie la matrice de la caméra
 	glm::mat4 cameraMatrix(1.0f);
 
-	/*Ici, on va créer une par une toutes les figures qui composent notre personnage
+	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));		// place la cam derrière le perso
+	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
 
-	Dans l'ordre:
-	-on instancie la figure
-	-on l'ajoute à la liste des figures
-	-on génère son buffer qu'on ajoute à la liste des buffers
-	-on créé sa matrice sans prendre en compte le scaling par souci de simplification
-	-on ajoute sa matrice à la liste des matrices. Attention à l'ordre des matrices. Chaque matrice doit dépendre de la matrice à sa gauche, la caméra étant le référentiel absolu
+	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));		// tentative de reculer la cam
 
-	On ne scale qu'une fois tous les objets créés afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils dépendent
+
+
+	// =========================== Flashlight ==============================================
+	/////////// Flashlight model loading ///////////////
+	std::vector<glm::vec3> flashlight_vertices;
+	std::vector<glm::vec2> flashlight_uvs;
+	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
+
+	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
+	// bool resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+
+	/* This model is just a test model adapted to our parser : */
+	// bool resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+
+	/* This one is a adapted model using Blender : */
+	bool resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	////////////////////////////////////
+
+
+	GLuint torchBuffer = NULL; 	// generate flashlight buffer
+
+	// !!!!! flashlight_vertices & flashlight_normal NE SONT PAS DES CONST FLOAT * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//torchBuffer = createBuffer(torchBuffer, (const float*)flashlight_vertices, (const float*)flashlight_normals, flashlight_vertices.size());
+
+	glGenBuffers(1, &torchBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, torchBuffer);
+		//			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbBgVertices, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, flashlight_vertices.size() * sizeof(glm::vec3), &flashlight_vertices[0], GL_STATIC_DRAW);
+
+		/* Pas défini donc empêche reflet lumière et texture : */
+		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgColor);
+		// glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+	// =========================== Backgroung (& floor ?) ==============================================
+
+	// TODO : create a dedicated class for the background wall ?? + rename bg in wall ??
+	uint32_t nbBgVertices = 3;
+
+	float bgPosition[] = { -1.0f, -1.0f, 1.0f,		// leftDown
+							 1.0f, -1.0f, 1.0f,		// rightDown
+							-1.0f,  1.0f, 1.0f };	// up
+
+	float bgColor[] = { 1.0f, 0.0f, 0.0f,
+						0.0f, 1.0f, 0.0f,
+						0.0f, 0.0f, 1.0f };
+
+
+	GLuint bgBuffer = NULL;	// generate background wall buffer
+	bgBuffer = createBuffer(bgBuffer, bgColor, bgPosition, nbBgVertices); // (sizeof(bgColor) / sizeof(bgColor[0]))/3); ???
+
+
+
+	// test floor using Immediate Mode
+	glColorMaterial(GL_FRONT, GL_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	glBegin(GL_TRIANGLES);
+		glVertex3f(0.5, 0.0, 0.0);
+		glVertex3f(0.0, 0.0, 0.0);
+		glVertex3f(0.0, 0.0, 0.5);
+
+		glVertex3f(-0.5, 0.0, 0.0);
+		glVertex3f(0.0, 0.0, 0.0);
+		glVertex3f(0.0, 0.0, -0.5);
+	glEnd();
+
+	// ===================================================================================================
+
+
+	/*
+		Ici, on va créer une par une toutes les figures qui composent notre personnage
+
+		Dans l'ordre :	- on instancie la figure
+						- on l'ajoute à la liste des figures
+						- on génère son buffer qu'on ajoute à la liste des buffers
+						- on créé sa matrice sans prendre en compte le scaling par souci de simplification
+						- on ajoute sa matrice à la liste des matrices. Attention à l'ordre des matrices. Chaque matrice doit dépendre de la matrice à sa gauche, la caméra étant le référentiel absolu
+
+		On ne scale qu'une fois tous les objets créés afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils dépendent
 	
-	On créé un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhaité.
-	Attention, par défaut un cylindre fait face à la caméra et ses faces plates sont invisibles.
+		On créé un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhaité.
+		Attention, par défaut un cylindre fait face à la caméra et ses faces plates sont invisibles.
 
-	On retrouvera un angle par défaut sur les figures représentant les épaules, coudes, cuisses et genoux car ce sont des articulations dans notre modèle
+		On retrouvera un angle par défaut sur les figures représentant les épaules, coudes, cuisses et genoux car ce sont des articulations dans notre modèle
 
-	A l'exception des angles qui sont calculés selon les données du TP, toutes les valeurs ont été trouvées par tatonnements
+		A l'exception des angles qui sont calculés selon les données du TP, toutes les valeurs ont été trouvées par tatonnements
 	*/
 	Cylinder body(32);
 	listeFigures.push_back(body);
@@ -227,6 +303,8 @@ int main(int argc, char *argv[])
 	glm::mat4 forearm2Matrix = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix);
 
+	// listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix * torchMatrix ????);
+
 	Cylinder thigh1(32);
 	listeFigures.push_back(thigh1);
 	listeBuffer.push_back(generate(thigh1));
@@ -283,6 +361,7 @@ int main(int argc, char *argv[])
 	listeMvp[3] = listeMvp[3] * scaleMatrix(0.1, 0.1, 0.25);
 	listeMvp[4] = listeMvp[4] * scaleMatrix(0.2, 0.2, 0.2);
 	listeMvp[5] = listeMvp[5] * scaleMatrix(0.1, 0.1, 0.25);
+
 	listeMvp[6] = listeMvp[6] * scaleMatrix(0.2, 0.2, 0.2);
 	listeMvp[7] = listeMvp[7] * scaleMatrix(0.1, 0.1, 0.25);
 	listeMvp[8] = listeMvp[8] * scaleMatrix(0.2, 0.2, 0.2);
@@ -316,28 +395,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
     }
 
-	/////////// Flashlight model loading ///////////////
 
+	////////////// Lumiere / Material ///////////////////////
 
-	std::vector<glm::vec3> flashlight_vertices;
-	std::vector<glm::vec2> flashlight_uvs;
-	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
-
-
-	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
-	// bool resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
-	
-	/* This model is just a test model adapted to our parser : */
-	// bool resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
-	
-	/* This one is a adapted model using Blender : */
-	bool resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
-
-
-
-	//////////////////////////
-	
-	// Lumiere/Mat :
 	Material material = Material();
 
 	// on se sert des 3 premieres dimensions de cette matrice pour calculer
@@ -390,6 +450,7 @@ int main(int argc, char *argv[])
                     {
                         case SDL_WINDOWEVENT_CLOSE:
                             isOpened = false;
+							printf("\n\nArret du programme..\n");
                             break;
                         default:
                             break;
@@ -521,6 +582,7 @@ int main(int argc, char *argv[])
 		listeMvp[5] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix;
 
 
+		// listeMvp[6] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix *  torchMatrix ????;
 		// Ici futur emplacement de la lampe
 		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
 		light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
@@ -574,87 +636,8 @@ int main(int argc, char *argv[])
 		listeMvp[17] = listeMvp[17] * scaleMatrix(0.2, 0.4, 0.2);
 
 
-		uint32_t nbBgVertices = 3;
-
-		float bgPosition[] = {
-			-1.0f, -1.0f, 0.8f,		// leftDown
-			 1.0f, -1.0f, 0.8f,		// rightDown
-			-1.0f,  1.0f, 0.8f		// up
-		};
-
-
-		float bgColor[] = { +1.0f, 0.0f, 0.0f,
-							0.0f, 1.0f, 0.0f,
-							0.0f, 0.0f, +1.0f };
-
-		//We generate our buffer
-		GLuint bgBuffer;
-		glGenBuffers(1, &bgBuffer);
-			//We fill this buffer as a GL_ARRAY_BUFFER (buffer containing vertices (points) information).
-			//Remind to close this buffer for not misusing it(glBindBuffer(GL_ARRAY_BUFFER, 0);)
-			glBindBuffer(GL_ARRAY_BUFFER, bgBuffer);
-			//2 coordinates per UV, 3 per normal and 3 per position. We do not yet copy these data (hence the NULL)
-			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbBgVertices, NULL, GL_DYNAMIC_DRAW);
-
-			//Copy one by one the data (first positions, then normals and finally UV).
-			//We remind that we do not necessarily need all of these variables, and that other variables may be needed for your usecase
-			//parameters : Target, buffer offset, size to copy, CPU data.
-			//We consider that each data are typed « float* » with sizeof(float)*nbBgVertices*nbCoordinate bytes where nbCoordinate = 2 or 3 following the number of components per value for this variable
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgPosition);
-			glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgColor);
-		glBindBuffer(GL_ARRAY_BUFFER, 0); //Close the buffer
-
-
-
-		// BackGround (test) using Immediate Mode
-		glColorMaterial(GL_FRONT, GL_DIFFUSE);
-		glEnable(GL_COLOR_MATERIAL);
-		glBegin(GL_TRIANGLES);
-			glColor3f(0.2, 0.5, 0.8);
-			glVertex3f(-1.0, -1.0, 0.9);
-			glColor3f(0.3, 0.5, 0.6);
-			glVertex3f(1.0, -1.0, 0.9);
-			glColor3f(0.4, 0.2, 0.2);
-			glVertex3f(-1.0, 1.0, 0.9);
-
-
-			glColor3f(0, 1, 0);
-			glVertex3f(1.0, 1.0, 0.9);
-			glColor3f(0, 0, 1);
-			glVertex3f(1.0, -1.0, 0.9);
-			glColor3f(1, 0, 0);
-			glVertex3f(-1.0, 1.0, 0.9);
-		glEnd();
-
-
-
-		//We generate our flashlight buffer
-		GLuint torchBuffer;
-		glGenBuffers(1, &torchBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, torchBuffer);
-//			glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbBgVertices, NULL, GL_DYNAMIC_DRAW);
-			glBufferData(GL_ARRAY_BUFFER, flashlight_vertices.size() * sizeof(glm::vec3), &flashlight_vertices[0], GL_STATIC_DRAW);
-
-			/* Est cela qui empêche reflet lumière et texture ??? */
-			// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgPosition);
-			// glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgColor);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-		// test floor
-		/*glBegin(GL_TRIANGLES);
-			glVertex3f(0.5, 0.0, 0.0);
-			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(0.0, 0.0, 0.5);
-
-			glVertex3f(-0.5, 0.0, 0.0);
-			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(0.0, 0.0, -0.5);
-		glEnd();*/
-
-
-
-        //TODO rendering
+		
+        // Rendering
         glUseProgram(shader->getProgramID());
         {
 			//on dessine toutes nos figures. Notez l'importance d'avoir les bons index et le même nombre d'éléments dans chaque liste
@@ -671,8 +654,7 @@ int main(int argc, char *argv[])
 			}
 
 
-
-			/* Flashlight */
+			/* Render flashlight */
 			Material torchMat = Material(glm::vec3(1.f, 0.f, 0.0f));	// red to better distinguish it
 
 			// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
@@ -696,13 +678,12 @@ int main(int argc, char *argv[])
 			}
 
 
-			/* BACKGROUND */
+			/* Render BACKGROUND */
 			// If the background material color is different of 'material' (the one used for
 			// the animated character), the light will not reflect on it... (?)
 			Material bgMat = Material(glm::vec3(0.f, 1.f, 0.f));
 
-			glm::mat4 matrixBackground(1.0f);
-			//matrixBackground = glm::scale(matrixBackground, glm::vec3(2.0f, 2.0f, 2.0f));
+			glm::mat4 matrixBackground = scaleMatrix(2.0f, 2.0f, 2.0f);
 			glm::mat4 mvpBackground = cameraMatrix * matrixBackground;
 
 			try
@@ -713,8 +694,6 @@ int main(int argc, char *argv[])
 			{
 				return EXIT_FAILURE;
 			}
-
-
 
         }
 
@@ -741,7 +720,8 @@ int main(int argc, char *argv[])
 		glDeleteBuffers(1, &buff);
 	}
 	
-	// glDeleteBuffers(1, &bgBuffer);	// Not in the scope..
+	glDeleteBuffers(1, &bgBuffer);
+	glDeleteBuffers(1, &torchBuffer);
 
 	glDeleteTextures(1, &textureID);
 
