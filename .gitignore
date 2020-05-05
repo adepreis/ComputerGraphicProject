@@ -91,7 +91,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+# *.obj 	We load .obj models in our project
 *.iobj
 *.pch
 *.pdb
