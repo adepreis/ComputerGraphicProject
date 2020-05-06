@@ -37,7 +37,6 @@
 #define TIME_PER_FRAME_MS  (1.0f/FRAMERATE * 1e3)
 #define INDICE_TO_PTR(x) ((void*)(x))
 
-
 int main(int argc, char *argv[])
 {
     ////////////////////////////////////////
@@ -189,7 +188,7 @@ int main(int argc, char *argv[])
 
 
 
-	// =========================== Background (& floor ?) ==============================================
+	// =========================== Backgroung (& floor ?) ==============================================
 
 	// TODO : create a dedicated class for the background wall ?? + rename bg in wall ??
 	uint32_t nbBgVertices = 3;
@@ -403,14 +402,11 @@ int main(int argc, char *argv[])
 	// on se sert des 3 premieres dimensions de cette matrice pour calculer
 	// la position de la lumière au bout du bras (de la lampe prochainement)
 	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
-	tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
-
-	glm::vec3 lightPos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
 
 	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
-	Light light = Light(lightPos, lightColorBase);	//position custom
+	Light light = Light(lightColorBase, lightColorBase);	//position custom
 
 
 	//////////////////////////////////////////////////////////////////////////////////////FIN_PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
@@ -572,11 +568,11 @@ int main(int argc, char *argv[])
 		listeMvp[1] = cameraMatrix * bodyMatrix * headMatrix;
 
 		// BRAS DROIT (CELUI QU'ON DIRIGE)
-		//shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionUD * (float)M_PI / 120.f, glm::vec3(1, 0, 0));
+		shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionUD * (float)M_PI / 120.f, glm::vec3(1, 0, 0));
 		// shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionLR * (float)M_PI / 120.f, glm::vec3(0, 0, 1));
 		listeMvp[2] = cameraMatrix * bodyMatrix * shoulder1Matrix;
 		listeMvp[3] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix;
-		//elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionUD * (float)M_PI / 360.f, glm::vec3(1, 0, 0));
+		elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionUD * (float)M_PI / 360.f, glm::vec3(1, 0, 0));
 		// elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionLR * (float)M_PI / 360.f, glm::vec3(0, 0, 1));
 		listeMvp[4] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix;
 		listeMvp[5] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix;
@@ -584,8 +580,11 @@ int main(int argc, char *argv[])
 
 		// listeMvp[6] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix *  torchMatrix ????;
 		// Ici futur emplacement de la lampe
-		//tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
-		//light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
+		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix);
+		light.pos = tempoMat[3];
+
+    	// Affichage des positions de la lumière
+		printf("pos: x: %d, y: %d, z: %d\n", (tempoMat[3]).x, (tempoMat[3]).y, (tempoMat[3]).z);
 
 
 		// BRAS GAUCHE (AU REPOS)
@@ -601,15 +600,15 @@ int main(int argc, char *argv[])
 			TODO : Conditionner le mouvement des jambes à l'avancement du personnage
 					(une fois que le déplacement du personnage sera géré)
 		 */
-		//thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
+		// thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[10] = cameraMatrix * bodyMatrix * thigh1Matrix;
-		//knee1Matrix = glm::rotate(knee1Matrix, -side * (float) M_PI / 540.f, glm::vec3(1, 0, 0));
+		// knee1Matrix = glm::rotate(knee1Matrix, -side * (float) M_PI / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[11] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix;
 		listeMvp[12] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix * leg1Matrix;
 		listeMvp[13] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix * leg1Matrix * foot1Matrix;
-		//thigh2Matrix = glm::rotate(thigh2Matrix, side *(float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
+		// thigh2Matrix = glm::rotate(thigh2Matrix, side *(float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[14] = cameraMatrix * bodyMatrix * thigh2Matrix;
-		//knee2Matrix = glm::rotate(knee2Matrix, side *(float)M_PI / 540.f, glm::vec3(1, 0, 0));
+		// knee2Matrix = glm::rotate(knee2Matrix, side *(float)M_PI / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[15] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix;
 		listeMvp[16] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix;
 		listeMvp[17] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix * foot2Matrix;
