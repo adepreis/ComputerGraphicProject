@@ -10,8 +10,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
-//needed for texture mapping
-#include <SDL2/SDL_image.h>
 
 #include "Shader.h"
 
@@ -89,53 +87,13 @@ int main(int argc, char *argv[])
 	//////////////////////////////////////////////////////////////////////////////////////////PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
 	
 
-	//Convert to an RGBA8888 surface
-	SDL_Surface* img = IMG_Load("../../Images/mercure.png");
-	SDL_Surface* rgbImg = SDL_ConvertSurfaceFormat(img, SDL_PIXELFORMAT_RGBA32, 0);
-
-	uint8_t* imgInverted = (uint8_t*)malloc(sizeof(uint8_t) * 4 * rgbImg->w*rgbImg->h);
-	for (uint32_t j = 0; j < rgbImg->h; j++)
-	{
-		for (uint32_t i = 0; i < rgbImg->w; i++)
-		{
-			for (uint8_t k = 0; k < 4; k++)
-			{
-				uint32_t oldID = 4 * (j*rgbImg->w + i) + k;
-				uint32_t newID = 4 * (j*rgbImg->w + rgbImg->w - 1 - i) + k;
-
-				imgInverted[newID] = ((uint8_t*)(rgbImg->pixels))[oldID];
-			}
-		}
-	}
-
-	SDL_FreeSurface(img);
 
 	//Send data to graphics card
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	{
+	GLuint textureMercure = createTexture("../../Images/mercure.png");
+	GLuint textureTest = createTexture("../../Images/testTexture.png");
+	GLuint textureWall = createTexture("../../Images/wall.jpg");
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// Repeat the texture if needed. Texture coordinates go from (0.0, 0.0) (bottom-left),
-		//		to (1.0, 1.0) (top-right). If repeat, (2.0, 2.0) is equivalent to (1.0, 1.0)
-		// S is "x coordinate" and T "y coordinate"
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// GL_REPEAT can be replaced by GL_MIRRORED_REPEAT,
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);	// GL_CLAMP_TO_EDGE or GL_CLAMP_TO_BORDER
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, rgbImg->w, rgbImg->h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)imgInverted);
-
-		//Generate mipmap.
-		//Optional but recommended
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-	
-	free(imgInverted);
-	SDL_FreeSurface(rgbImg);
+	GLuint textureTorch = createTexture("../../Images/steel.jpg");		// stainless_steel.jpg");
 
 
     //TODO
@@ -183,28 +141,71 @@ int main(int argc, char *argv[])
 		glBufferData(GL_ARRAY_BUFFER, flashlight_vertices.size() * sizeof(glm::vec3), &flashlight_vertices[0], GL_STATIC_DRAW);
 
 		/* Pas défini donc empêche reflet lumière et texture : */
-		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, bgColor);
-		// glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, bgPosition);
+		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbBgVertices, wallColor);
+		// glBufferSubData(GL_ARRAY_BUFFER, 3 * sizeof(float)*nbBgVertices, 3 * sizeof(float)*nbBgVertices, wallPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
 
-	// =========================== Background (& floor ?) ==============================================
+	// =========================== Background wall (& floor ?) ==============================================
 
-	// TODO : create a dedicated class for the background wall ?? + rename bg in wall ??
-	uint32_t nbBgVertices = 3;
+	// TODO : create a dedicated class (almost same as Cube) for the background wall ??
+	uint32_t nbBgVertices = 18;
 
-	float bgPosition[] = { -1.0f, -1.0f, 1.0f,		// leftDown
-							 1.0f, -1.0f, 1.0f,		// rightDown
-							-1.0f,  1.0f, 1.0f };	// up
+	float wallPosition[3*18] = { //Back
+							-0.5, -0.5,  0.5,
+							 0.5,  0.5,  0.5,
+							 0.5, -0.5,  0.5,
+							-0.5, -0.5,  0.5,
+							-0.5,  0.5,  0.5,
+							 0.5,  0.5,  0.5,
 
-	float bgColor[] = { 1.0f, 0.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-						0.0f, 0.0f, 1.0f };
+							 //Left
+							 -0.5, -0.5,  0.5,
+							 -0.5, -0.5, -0.5,
+							 -0.5,  0.5, -0.5,
+							 -0.5, -0.5,  0.5,
+							 -0.5,  0.5, -0.5,
+							 -0.5,  0.5,  0.5,
+
+							 //Right
+							  0.5, -0.5,  0.5,
+							  0.5,  0.5, -0.5,
+							  0.5, -0.5, -0.5,
+							  0.5, -0.5,  0.5,
+							  0.5,  0.5,  0.5,
+							  0.5,  0.5, -0.5 };
 
 
-	GLuint bgBuffer = NULL;	// generate background wall buffer
-	bgBuffer = createBuffer(bgBuffer, bgColor, bgPosition, nbBgVertices); // (sizeof(bgColor) / sizeof(bgColor[0]))/3); ???
+	float wallColor[3*18] = {	//Back
+						   0.0, 0.0, 1.0,
+						   0.0, 0.0, 1.0,
+						   0.0, 0.0, 1.0,
+						   0.0, 0.0, 1.0,
+						   0.0, 0.0, 1.0,
+						   0.0, 0.0, 1.0,
+
+						   //Left
+						   -1.0, 0.0, 0.0,
+						   -1.0, 0.0, 0.0,
+						   -1.0, 0.0, 0.0,
+						   -1.0, 0.0, 0.0,
+						   -1.0, 0.0, 0.0,
+						   -1.0, 0.0, 0.0,
+
+						   //Right
+							1.0, 0.0, 0.0,
+							1.0, 0.0, 0.0,
+							1.0, 0.0, 0.0,
+							1.0, 0.0, 0.0,
+							1.0, 0.0, 0.0,
+							1.0, 0.0, 0.0 };
+
+		// Test Geometry texture with createBuffer() and no generate() :
+		// Sphere testSph(16, 16);
+	GLuint wallBuffer = NULL;	// generate background wall buffer
+		// wallBuffer = createBuffer(wallBuffer, testSph.getNormals(), testSph.getVertices(), testSph.getNbVertices());
+	wallBuffer = createBuffer(wallBuffer, wallPosition, wallColor, nbBgVertices);
 
 
 
@@ -396,9 +397,8 @@ int main(int argc, char *argv[])
     }
 
 
-	////////////// Lumiere / Material ///////////////////////
+	/////////////////// Lumiere ///////////////////////
 
-	Material material = Material();
 
 	// on se sert des 3 premieres dimensions de cette matrice pour calculer
 	// la position de la lumière au bout du bras (de la lampe prochainement)
@@ -407,10 +407,22 @@ int main(int argc, char *argv[])
 
 	glm::vec3 lightPos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
 
-	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
-	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
-	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
+	// glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);		// yellow tint
+	glm::vec3 lightColorBase = glm::vec3(10.0f, 10.0f, 10.0f);			// white light
 	Light light = Light(lightPos, lightColorBase);	//position custom
+
+
+
+	////////////////  Materiau ///////////////////////
+
+	Material bodyMaterial = Material();
+
+	// If the wall's material color is different of 'material' (the one used for
+	// the animated character), the light will not reflect on it... (?)
+	Material wallMaterial = Material(glm::vec3(0.58f, 0.4f, 0.42f));
+
+	// Torch's material
+	Material torchMat = Material(glm::vec3(0.51f, 0.51f, 0.51f), 0.f, 0.5f, 1.f, 250.f);
 
 
 	//////////////////////////////////////////////////////////////////////////////////////FIN_PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
@@ -572,11 +584,11 @@ int main(int argc, char *argv[])
 		listeMvp[1] = cameraMatrix * bodyMatrix * headMatrix;
 
 		// BRAS DROIT (CELUI QU'ON DIRIGE)
-		//shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionUD * (float)M_PI / 120.f, glm::vec3(1, 0, 0));
+		shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionUD * (float)M_PI / 120.f, glm::vec3(1, 0, 0));
 		// shoulder1Matrix = glm::rotate(shoulder1Matrix, armDirectionLR * (float)M_PI / 120.f, glm::vec3(0, 0, 1));
 		listeMvp[2] = cameraMatrix * bodyMatrix * shoulder1Matrix;
 		listeMvp[3] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix;
-		//elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionUD * (float)M_PI / 360.f, glm::vec3(1, 0, 0));
+		elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionUD * (float)M_PI / 360.f, glm::vec3(1, 0, 0));
 		// elbow1Matrix = glm::rotate(elbow1Matrix, armDirectionLR * (float)M_PI / 360.f, glm::vec3(0, 0, 1));
 		listeMvp[4] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix;
 		listeMvp[5] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix;
@@ -584,8 +596,8 @@ int main(int argc, char *argv[])
 
 		// listeMvp[6] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix *  torchMatrix ????;
 		// Ici futur emplacement de la lampe
-		//tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
-		//light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
+		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
+		light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
 
 
 		// BRAS GAUCHE (AU REPOS)
@@ -645,7 +657,7 @@ int main(int argc, char *argv[])
 			{
 				try
 				{
-					draw(listeBuffer[i], listeFigures[i].getNbVertices(), shader, listeMvp[i], material, light, textureID);
+					draw(listeBuffer[i], listeFigures[i].getNbVertices(), shader, listeMvp[i], bodyMaterial, light, textureMercure);
 				}
 				catch (...)
 				{
@@ -655,7 +667,6 @@ int main(int argc, char *argv[])
 
 
 			/* Render flashlight */
-			Material torchMat = Material(glm::vec3(1.f, 0.f, 0.0f));	// red to better distinguish it
 
 			// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
 
@@ -669,7 +680,7 @@ int main(int argc, char *argv[])
 			if (resTorch) {
 				try
 				{
-					draw(torchBuffer, flashlight_verticesNB, shader, mvpTorch, torchMat, light, textureID);
+					draw(torchBuffer, flashlight_verticesNB, shader, mvpTorch, torchMat, light, textureTorch);
 				}
 				catch (...)
 				{
@@ -678,17 +689,18 @@ int main(int argc, char *argv[])
 			}
 
 
-			/* Render BACKGROUND */
-			// If the background material color is different of 'material' (the one used for
-			// the animated character), the light will not reflect on it... (?)
-			Material bgMat = Material(glm::vec3(0.f, 1.f, 0.f));
+			/* Render BACKGROUND Wall */
 
-			glm::mat4 matrixBackground = scaleMatrix(2.0f, 2.0f, 2.0f);
-			glm::mat4 mvpBackground = cameraMatrix * matrixBackground;
+			glm::mat4 matrixWall = scaleMatrix(1.5f, 1.5f, 1.5f);
+
+			matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotés
+			matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.5f, 0.1f));			// abaisse + recule legèrement par rapport au perso
+			
+			glm::mat4 mvpWall = cameraMatrix * matrixWall;
 
 			try
 			{
-				draw(bgBuffer, nbBgVertices, shader, mvpBackground, bgMat, light, textureID);
+				draw(wallBuffer, nbBgVertices, shader, mvpWall, wallMaterial, light, textureWall);	// textureTest);
 			}
 			catch (...)
 			{
@@ -720,10 +732,13 @@ int main(int argc, char *argv[])
 		glDeleteBuffers(1, &buff);
 	}
 	
-	glDeleteBuffers(1, &bgBuffer);
+	glDeleteBuffers(1, &wallBuffer);
 	glDeleteBuffers(1, &torchBuffer);
 
-	glDeleteTextures(1, &textureID);
+	glDeleteTextures(1, &textureMercure);
+	glDeleteTextures(1, &textureTest);
+	glDeleteTextures(1, &textureWall);
+	glDeleteTextures(1, &textureTorch);
 
     if(context != NULL)
         SDL_GL_DeleteContext(context);
