@@ -18,9 +18,9 @@ GLuint createBuffer(GLuint buffer, const float* vertices, const float* normals, 
 {
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW); // 3 pour les coordonnees , 3 pour la couleur
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 3 * nbVertices, 3 * sizeof(float)*nbVertices, normals);
+		glBufferData(GL_ARRAY_BUFFER, (3 + 3) * sizeof(float)*nbVertices, NULL, GL_DYNAMIC_DRAW); // 3 pour les coordonnees , 3 pour la couleur
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 3 * nbVertices, vertices);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 3 * nbVertices, 3 * sizeof(float)*nbVertices, normals);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return buffer;
