@@ -90,9 +90,9 @@ To interact with our project, the keys to use are :
 
 ## Authors
 
-* **B Lucas** - *work description* - @0xWryth
-* **D Antonin** - *work description* - @adepreis
-* **D Guillaume** - *work description* - @gdescomps
+* **B Lucas** - *Debuggage, vue FPS (?)* - @0xWryth
+* **D Antonin** - *Importation modèle torche, controls, murs, texture* - @adepreis
+* ~~**D Guillaume** - *work description* - @gdescomps~~
 
 ---
 
