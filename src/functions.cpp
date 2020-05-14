@@ -114,9 +114,9 @@ void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Ma
 		// uTexture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
-		glUniform1i(uTexture, 0);
-		glDrawArrays(GL_TRIANGLES, 0, figVertices);
+			GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
+			glUniform1i(uTexture, 0);
+			glDrawArrays(GL_TRIANGLES, 0, figVertices);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 	//glDrawArrays(GL_TRIANGLES, 0, figVertices);
@@ -132,7 +132,7 @@ void displayCommands()
 		- `q` : move sideways to the left
 		- `d` : move sideways to the right
 	*/
-	printf("COMMANDS :\n");
+	printf("\nCOMMANDS :\n");
 	printf("========================================================\n");
 	printf("Control the arm with your mouse cursor\n");
 	printf("`Left Click` on the mouse to turn on/off the flashlight");
@@ -143,6 +143,12 @@ GLuint createTexture(const char * path)
 	//Convert to an RGBA8888 surface
 	SDL_Surface* img = IMG_Load(path);
 	SDL_Surface* rgbImg = SDL_ConvertSurfaceFormat(img, SDL_PIXELFORMAT_RGBA32, 0);
+
+	if (!rgbImg)
+	{
+		ERROR("Could not find texture to load at \"%s\"..\n", path);
+		return EXIT_FAILURE;
+	}
 
 	uint8_t* imgInverted = (uint8_t*)malloc(sizeof(uint8_t) * 4 * rgbImg->w*rgbImg->h);
 	for (uint32_t j = 0; j < rgbImg->h; j++)
