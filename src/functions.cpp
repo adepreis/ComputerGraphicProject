@@ -114,9 +114,9 @@ void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Ma
 		// uTexture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
-		glUniform1i(uTexture, 0);
-		glDrawArrays(GL_TRIANGLES, 0, figVertices);
+			GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTexture");
+			glUniform1i(uTexture, 0);
+			glDrawArrays(GL_TRIANGLES, 0, figVertices);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 	//glDrawArrays(GL_TRIANGLES, 0, figVertices);

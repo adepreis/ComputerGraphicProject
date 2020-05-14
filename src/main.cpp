@@ -81,13 +81,13 @@ int main(int argc, char *argv[])
     glViewport(0, 0, WIDTH, HEIGHT); //Draw on ALL the screen
 
     //The OpenGL background color (RGBA, each component between 0.0f and 1.0f)
-	//glClearColor(0.0, 0.0, 0.0, 1.0);		//Full Black
-	glClearColor(0.2, 0.2, 0.2, 1.0);		//Light grey
-	//glClearColor(128.0, 0.0, 128.0, 1.0); //Pink
+	//glClearColor(0.0, 0.0, 0.0, 1.0);			// Full Black
+	glClearColor(0.2, 0.2, 0.2, 1.0);			// Light grey
+	//glClearColor(128.0, 0.0, 128.0, 1.0);		// Pink
 
-    glEnable(GL_DEPTH_TEST); //Active the depth test
+    glEnable(GL_DEPTH_TEST);	// Active the depth test
 
-	/////////////////////////////////////////////////////////////// PARTIE_ELEVE /////////////////////////////////////////////////////////
+
 
 	// =========================== Flashlight model loading ==============================================
 	std::vector<glm::vec3> flashlight_vertices;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	// =========================== Background wall (& floor ?) ==============================================
+	// =========================== Background wall init (& floor ?) ==============================================
 
 	Wall wall = Wall();
 	GLuint wallBuffer = NULL;	// generate background wall buffer
@@ -137,7 +137,6 @@ int main(int argc, char *argv[])
 
 	// =========================== Texture loading ==============================================
 	GLuint textureMercure = createTexture("../../Images/mercure.png");
-	GLuint textureTest = createTexture("../../Images/testTexture.png");
 	GLuint textureWall = createTexture("../../Images/wall.jpg");
 	GLuint textureTorch = createTexture("../../Images/steel.jpg");
 
@@ -151,6 +150,14 @@ int main(int argc, char *argv[])
 	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
 	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));				// tentative de reculer la cam
 
+
+	// Background wall
+	glm::mat4 matrixWall = scaleMatrix(1.8f, 1.8f, 1.5f);
+
+	matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotés
+	matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.3f, 0.1f));			// abaisse + recule legèrement par rapport au perso
+
+	glm::mat4 mvpWall = cameraMatrix * matrixWall;
 
 	/*
 		Ici, on va créer une par une toutes les figures qui composent notre personnage
@@ -168,9 +175,9 @@ int main(int argc, char *argv[])
 		A l'exception des angles qui sont calculés selon les données du TP, toutes les valeurs ont été trouvées par tatonnements
 	*/
 
-	std::vector <Geometry>	listeFigures; //liste de toutes les figures créées
-	std::vector <GLuint>	listeBuffer; //liste des buffers associés aux figures
-	std::vector <glm::mat4> listeMvp; //liste des matrices associées aux figures
+	std::vector <Geometry>	listeFigures;	//liste de toutes les figures créées
+	std::vector <GLuint>	listeBuffer;	//liste des buffers associés aux figures
+	std::vector <glm::mat4> listeMvp;		//liste des matrices associées aux figures
 
 	Cylinder body(32);
 	listeFigures.push_back(body);
@@ -210,22 +217,18 @@ int main(int argc, char *argv[])
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix);
 
 
-	////////////////////////////////////
+	//// Create torch's buffer, matrix and MVP separately because it isn't compatible with listeFigures's element type.. ////
 	uint32_t nbVerticesFlashlight = flashlight_vertices.size();
-	GLuint torchBuffer = NULL; 	// generate flashlight buffer
-
-	// listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix * torchMatrix ????);
+	GLuint torchBuffer = NULL; 	// Flashlight buffer
 
 	// cast obligé car flashlight_vertices & flashlight_normal ne sont pas des const float * :
 	torchBuffer = createBuffer(torchBuffer, glm::value_ptr(flashlight_vertices[0]), glm::value_ptr(flashlight_normals[0]), nbVerticesFlashlight);
 
-	glm::mat4 matrixTorch = scaleMatrix(0.03f, 0.03f, 0.03f);
-	matrixTorch = glm::translate(matrixTorch, glm::vec3(0.f, 0.7f, -3.5f));
-	matrixTorch = glm::rotate(matrixTorch, (float)M_PI, glm::vec3(0, 1, 0));
+	glm::mat4 matrixTorch = getMatrix(0.0, 0.02, -0.15, (float)M_PI, 0, 1, 0);
 	matrixTorch = glm::rotate(matrixTorch, -0.5f, glm::vec3(1, 0, 0));
 
 	glm::mat4 mvpTorch = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
-	////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	
 	Sphere shoulder2(32, 32);
@@ -300,15 +303,14 @@ int main(int argc, char *argv[])
 	glm::mat4 foot2Matrix = getMatrix(0, 0.1, -0.2, 0.f, 0, 0, 1);
 	listeMvp.push_back(cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix * foot2Matrix);
 
-	//on scale tous les objets
 
+	//on scale tous les objets
 	listeMvp[0] = listeMvp[0] * scaleMatrix(0.5, 0.5, 0.8);
 	listeMvp[1] = listeMvp[1] * scaleMatrix(0.3, 0.3, 0.3);
 	listeMvp[2] = listeMvp[2] * scaleMatrix(0.2, 0.2, 0.2);
 	listeMvp[3] = listeMvp[3] * scaleMatrix(0.1, 0.1, 0.25);
 	listeMvp[4] = listeMvp[4] * scaleMatrix(0.2, 0.2, 0.2);
 	listeMvp[5] = listeMvp[5] * scaleMatrix(0.1, 0.1, 0.25);
-
 	listeMvp[6] = listeMvp[6] * scaleMatrix(0.2, 0.2, 0.2);
 	listeMvp[7] = listeMvp[7] * scaleMatrix(0.1, 0.1, 0.25);
 	listeMvp[8] = listeMvp[8] * scaleMatrix(0.2, 0.2, 0.2);
@@ -322,8 +324,9 @@ int main(int argc, char *argv[])
 	listeMvp[16] = listeMvp[16] * scaleMatrix(0.15, 0.15, 0.38);
 	listeMvp[17] = listeMvp[17] * scaleMatrix(0.2, 0.4, 0.2);
 
+	// Flashlight scaling
+	mvpTorch = mvpTorch * scaleMatrix(0.03, 0.03, 0.03);
 
-    //From here you can load your OpenGL objects, like VBO, Shaders, etc.
     
 	//On charge les fichiers relatifs aux shaders
     FILE* vertFile = fopen("Shaders/color.vert", "r");
@@ -345,7 +348,6 @@ int main(int argc, char *argv[])
 
 	/////////////////// Lumiere ///////////////////////
 
-
 	// on se sert des 3 premieres dimensions de cette matrice pour calculer
 	// la position de la lumière au bout du bras (de la lampe prochainement)
 	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
@@ -355,7 +357,7 @@ int main(int argc, char *argv[])
 
 	// glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);		// yellow tint
 	glm::vec3 lightColorBase = glm::vec3(10.0f, 10.0f, 10.0f);			// white light
-	Light light = Light(lightPos, lightColorBase);	//position custom
+	Light light = Light(lightPos, lightColorBase);				// position custom
 
 
 
@@ -371,14 +373,13 @@ int main(int argc, char *argv[])
 	Material torchMat = Material(glm::vec3(0.08f, 0.08f, 0.08f), 0.f, 0.5f, 1.f, 250.f);
 
 
-	//////////////////////////////////////////////////////////////// FIN_PARTIE_ELEVE //////////////////////////////////////////////////////////////
 
     bool isOpened = true;
 
 	//Ici, on instancie des variables qui vont servir à l'animation
-	int t = 0; //incrémenté à chaque tour de boucle
+	int t = 0;	//incrémenté à chaque tour de boucle
 
-	int side = 1; //pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
+	int side = 1;	//pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
 	int timer = 60; //temps avant le changement de sens de rotation, en tours de boucle
 
 	int amplitudeArmLR, amplitudeArmUD = 50; //pour limiter rotation du bras en x et en y ; compris dans [0,100]
@@ -497,22 +498,20 @@ int main(int argc, char *argv[])
         //Clear the screen : the depth buffer and the color buffer
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	//////////////////////////////////////////////////////////////////////////////////////////PARTIE_ELEVE////////////////////////////////////////////////////////////////////////////////////
+
 		// A chaque tour de boucle on décrémente le timer
-		if (timer > 0)
-		{
+		if (timer > 0) {
 			timer--;
-			if (timer == 0)
-			{
+			if (timer == 0) {
 				side = -side; //on change le sens de rotation
 				timer = 60; //on réinitialise le timer
 			}
 		}
 
-		//TODO operations on matrix
+		//////////////////////////////////// Operations on matrices ////////////////////////////////////
+
 		// On réinitialise les données de la figure principale (le corps)
 		bodyMatrix = getMatrix(0, -0.3, 0, -M_PI / 2.f, 1, 0, 0);
-
 
 
 		/*
@@ -572,9 +571,14 @@ int main(int argc, char *argv[])
 		listeMvp[15] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix;
 		listeMvp[16] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix;
 		listeMvp[17] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix * foot2Matrix;
-		
-		//on oublie pas de rescale
 
+
+		// compute flashlight and wall position
+		mvpTorch = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
+		mvpWall = cameraMatrix * matrixWall;
+		
+
+		// on oublie pas de rescale
 		listeMvp[0] = listeMvp[0] * scaleMatrix(0.5, 0.5, 0.8);
 		listeMvp[1] = listeMvp[1] * scaleMatrix(0.3, 0.3, 0.3);
 		listeMvp[2] = listeMvp[2] * scaleMatrix(0.2, 0.2, 0.2);
@@ -594,12 +598,13 @@ int main(int argc, char *argv[])
 		listeMvp[16] = listeMvp[16] * scaleMatrix(0.15, 0.15, 0.38);
 		listeMvp[17] = listeMvp[17] * scaleMatrix(0.2, 0.4, 0.2);
 
+		// flashlight re-scaling
+		mvpTorch = mvpTorch * scaleMatrix(0.03, 0.03, 0.03);
 
 		
-        // Rendering
         glUseProgram(shader->getProgramID());
         {
-			//on dessine toutes nos figures. Notez l'importance d'avoir les bons index et le même nombre d'éléments dans chaque liste
+			/* Figures rendering */
 			for (int i = 0; i < listeFigures.size(); i++)
 			{
 				try
@@ -612,10 +617,7 @@ int main(int argc, char *argv[])
 				}
 			}
 
-
-			/* Render flashlight */
-			mvpTorch = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
-
+			/* Flashlight rendering */
 			if (resTorch) {
 				try
 				{
@@ -627,31 +629,19 @@ int main(int argc, char *argv[])
 				}
 			}
 
-
-			/* Render BACKGROUND Wall */
-
-			glm::mat4 matrixWall = scaleMatrix(1.5f, 1.5f, 1.5f);
-
-			matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotés
-			matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.5f, 0.1f));			// abaisse + recule legèrement par rapport au perso
-			
-			glm::mat4 mvpWall = cameraMatrix * matrixWall;
-
+			/* BACKGROUND Wall rendering */
 			try
 			{
-				draw(wallBuffer, wall.getNbVertices(), shader, mvpWall, wallMaterial, light, textureWall);	// textureTest);
+				draw(wallBuffer, wall.getNbVertices(), shader, mvpWall, wallMaterial, light, textureWall);
 			}
 			catch (...)
 			{
 				return EXIT_FAILURE;
 			}
-
         }
 
         glUseProgram(0);
 
-
-		///////////////////////////////////////////////////////////////// FIN_PARTIE_ELEVE ///////////////////////////////////////////////////////////////
 
         //Display on screen (swap the buffer on screen and the buffer you are drawing on)
         SDL_GL_SwapWindow(window);
@@ -675,7 +665,6 @@ int main(int argc, char *argv[])
 	glDeleteBuffers(1, &torchBuffer);
 
 	glDeleteTextures(1, &textureMercure);
-	glDeleteTextures(1, &textureTest);
 	glDeleteTextures(1, &textureWall);
 	glDeleteTextures(1, &textureTorch);
 
