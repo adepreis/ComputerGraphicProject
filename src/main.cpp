@@ -88,62 +88,34 @@ int main(int argc, char *argv[])
     glEnable(GL_DEPTH_TEST); //Active the depth test
 
 	/////////////////////////////////////////////////////////////// PARTIE_ELEVE /////////////////////////////////////////////////////////
-	
 
-	//Send data to graphics card
-	GLuint textureMercure = createTexture("../../Images/mercure.png");
-	GLuint textureTest = createTexture("../../Images/testTexture.png");
-	GLuint textureWall = createTexture("../../Images/wall.jpg");
-
-	GLuint textureTorch = createTexture("../../Images/steel.jpg");
-
-
-	std::vector <Geometry>	listeFigures; //liste de toutes les figures créées
-	std::vector <GLuint>	listeBuffer; //liste des buffers associés aux figures
-	std::vector <glm::mat4> listeMvp; //liste des matrices associées aux figures
-
-	//ATTENTION: on veillera à ce que tous les objets liés à une même figure soient au même index dans toutes les listes
-
-	//on instancie la matrice de la caméra
-	glm::mat4 cameraMatrix(1.0f);
-
-
-	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derrière le perso
-	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
-	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));				// tentative de reculer la cam
-
-
-
-	// =========================== Flashlight ==============================================
-	/////////// Flashlight model loading ///////////////
+	// =========================== Flashlight model loading ==============================================
 	std::vector<glm::vec3> flashlight_vertices;
 	std::vector<glm::vec2> flashlight_uvs;
 	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
 
+	// Resultat de l'importation du modèle de lampe torche :
+	bool resTorch = false;
+
 	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
-	// bool resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	// resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
 	/* This model is just a test model adapted to our parser : */
-	// bool resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	// resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
 	/* This one is a adapted model using Blender : */
-	bool resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
-	////////////////////////////////////
+	resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
-
-	GLuint torchBuffer = NULL; 	// generate flashlight buffer
-
-	// cast obligé car flashlight_vertices & flashlight_normal ne sont pas des const float * :
-	torchBuffer = createBuffer(torchBuffer, glm::value_ptr(flashlight_vertices[0]), glm::value_ptr(flashlight_normals[0]), flashlight_vertices.size());
-
+	if (!resTorch)
+	{
+		ERROR("Could not load flashlight model..\n");
+		return EXIT_FAILURE;
+	}
 
 	// =========================== Background wall (& floor ?) ==============================================
 
-		// Test Geometry texture with createBuffer() and no generate() :
-		// Sphere testSph(16, 16);
 	Wall wall = Wall();
 	GLuint wallBuffer = NULL;	// generate background wall buffer
-		// wallBuffer = createBuffer(wallBuffer, testSph.getNormals(), testSph.getVertices(), testSph.getNbVertices());
 	wallBuffer = createBuffer(wallBuffer, wall.getNormals(), wall.getVertices(), wall.getNbVertices());
 
 
@@ -163,9 +135,26 @@ int main(int argc, char *argv[])
 
 
 
+	// =========================== Texture loading ==============================================
+	GLuint textureMercure = createTexture("../../Images/mercure.png");
+	GLuint textureTest = createTexture("../../Images/testTexture.png");
+	GLuint textureWall = createTexture("../../Images/wall.jpg");
+	GLuint textureTorch = createTexture("../../Images/steel.jpg");
+
+
+	/*
+		Matrice de la caméra
+	*/
+	glm::mat4 cameraMatrix(1.0f);
+
+	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derrière le perso
+	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
+	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));				// tentative de reculer la cam
+
+
 	/*
 		Ici, on va créer une par une toutes les figures qui composent notre personnage
-
+			- ATTENTION : on veillera à ce que tous les objets liés à une même figure soient au même index dans toutes les listes
 		Dans l'ordre :	- on instancie la figure
 						- on l'ajoute à la liste des figures
 						- on génère son buffer qu'on ajoute à la liste des buffers
@@ -178,6 +167,11 @@ int main(int argc, char *argv[])
 		On retrouvera un angle par défaut sur les figures représentant les épaules, coudes, cuisses et genoux car ce sont des articulations dans notre modèle
 		A l'exception des angles qui sont calculés selon les données du TP, toutes les valeurs ont été trouvées par tatonnements
 	*/
+
+	std::vector <Geometry>	listeFigures; //liste de toutes les figures créées
+	std::vector <GLuint>	listeBuffer; //liste des buffers associés aux figures
+	std::vector <glm::mat4> listeMvp; //liste des matrices associées aux figures
+
 	Cylinder body(32);
 	listeFigures.push_back(body);
 	listeBuffer.push_back(generate(body));
@@ -214,6 +208,25 @@ int main(int argc, char *argv[])
 	listeBuffer.push_back(generate(forearm1));
 	glm::mat4 forearm1Matrix = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix);
+
+
+	////////////////////////////////////
+	uint32_t nbVerticesFlashlight = flashlight_vertices.size();
+	GLuint torchBuffer = NULL; 	// generate flashlight buffer
+
+	// listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix * torchMatrix ????);
+
+	// cast obligé car flashlight_vertices & flashlight_normal ne sont pas des const float * :
+	torchBuffer = createBuffer(torchBuffer, glm::value_ptr(flashlight_vertices[0]), glm::value_ptr(flashlight_normals[0]), nbVerticesFlashlight);
+
+	glm::mat4 matrixTorch = scaleMatrix(0.03f, 0.03f, 0.03f);
+	matrixTorch = glm::translate(matrixTorch, glm::vec3(0.f, 0.7f, -3.5f));
+	matrixTorch = glm::rotate(matrixTorch, (float)M_PI, glm::vec3(0, 1, 0));
+	matrixTorch = glm::rotate(matrixTorch, -0.5f, glm::vec3(1, 0, 0));
+
+	glm::mat4 mvpTorch = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
+	////////////////////////////////////
+
 	
 	Sphere shoulder2(32, 32);
 	listeFigures.push_back(shoulder2);
@@ -238,8 +251,6 @@ int main(int argc, char *argv[])
 	listeBuffer.push_back(generate(forearm2));
 	glm::mat4 forearm2Matrix = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix);
-
-	// listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder2Matrix * arm2Matrix * elbow2Matrix * forearm2Matrix * torchMatrix ????);
 
 	Cylinder thigh1(32);
 	listeFigures.push_back(thigh1);
@@ -355,6 +366,7 @@ int main(int argc, char *argv[])
 	// the light didn't seems to reflect on the wall... (?)
 	Material wallMaterial = Material(glm::vec3(0.58f, 0.4f, 0.42f));
 
+	// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
 	// Light grey Torch's material
 	Material torchMat = Material(glm::vec3(0.08f, 0.08f, 0.08f), 0.f, 0.5f, 1.f, 250.f);
 
@@ -602,20 +614,12 @@ int main(int argc, char *argv[])
 
 
 			/* Render flashlight */
+			mvpTorch = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
 
-			// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
-
-			glm::mat4 matrixTorch = scaleMatrix(0.03f, 0.03f, 0.03f);
-			matrixTorch = glm::translate(matrixTorch, glm::vec3(-20.f, -8.f, 0.0f));
-			matrixTorch = glm::rotate(matrixTorch, (float)M_PI, glm::vec3(0, 1, 0));
-			matrixTorch = glm::rotate(matrixTorch, -0.2f, glm::vec3(1, 0, 0));
-
-			glm::mat4 mvpTorch = cameraMatrix * matrixTorch;
-			uint32_t flashlight_verticesNB = flashlight_vertices.size();
 			if (resTorch) {
 				try
 				{
-					draw(torchBuffer, flashlight_verticesNB, shader, mvpTorch, torchMat, light, textureTorch);
+					draw(torchBuffer, nbVerticesFlashlight, shader, mvpTorch, torchMat, light, textureTorch);
 				}
 				catch (...)
 				{

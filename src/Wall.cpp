@@ -85,15 +85,5 @@ Wall::Wall()
 		m_vertices[i] = normals[i];
     }
 
-}
-
-
-Wall::~Wall()
-{
-    if(m_vertices)
-        free(m_vertices);
-    if(m_normals)
-        free(m_normals);
-    if(m_uvs)
-        free(m_uvs);
+	m_nbVertices = 18;
 }
