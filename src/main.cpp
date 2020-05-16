@@ -26,17 +26,16 @@
 
 #include "Wall.h"
 
-//libraries supplémentaires
+//libraries supplï¿½mentaires
 #include "vector"
 #include "math.h"
 
-//On définit une fenêtre carrée pour éviter tout problème de rotation ou scaling.
+//On dï¿½finit une fenï¿½tre carrï¿½e pour ï¿½viter tout problï¿½me de rotation ou scaling.
 #define WIDTH     700
 #define HEIGHT    700
 #define FRAMERATE 60
 #define TIME_PER_FRAME_MS  (1.0f/FRAMERATE * 1e3)
 #define INDICE_TO_PTR(x) ((void*)(x))
-
 
 int main(int argc, char *argv[])
 {
@@ -94,7 +93,7 @@ int main(int argc, char *argv[])
 	std::vector<glm::vec2> flashlight_uvs;
 	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
 
-	// Resultat de l'importation du modèle de lampe torche :
+	// Resultat de l'importation du modï¿½le de lampe torche :
 	bool resTorch = false;
 
 	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
@@ -134,6 +133,7 @@ int main(int argc, char *argv[])
 	// glEnd();
 
 
+	// =========================== Backgroung (& floor ?) ==============================================
 
 	// =========================== Texture loading ==============================================
 	GLuint textureMercure = createTexture("../../Images/mercure.png");
@@ -142,11 +142,11 @@ int main(int argc, char *argv[])
 
 
 	/*
-		Matrice de la caméra
+		Matrice de la camï¿½ra
 	*/
 	glm::mat4 cameraMatrix(1.0f);
 
-	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derrière le perso
+	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derriï¿½re le perso
 	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
 	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));				// tentative de reculer la cam
 
@@ -154,30 +154,30 @@ int main(int argc, char *argv[])
 	// Background wall
 	glm::mat4 matrixWall = scaleMatrix(1.8f, 1.8f, 1.5f);
 
-	matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotés
-	matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.3f, 0.1f));			// abaisse + recule legèrement par rapport au perso
+	matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotï¿½s
+	matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.3f, 0.1f));			// abaisse + recule legï¿½rement par rapport au perso
 
 	glm::mat4 mvpWall = cameraMatrix * matrixWall;
 
 	/*
-		Ici, on va créer une par une toutes les figures qui composent notre personnage
-			- ATTENTION : on veillera à ce que tous les objets liés à une même figure soient au même index dans toutes les listes
+		Ici, on va crï¿½er une par une toutes les figures qui composent notre personnage
+			- ATTENTION : on veillera ï¿½ ce que tous les objets liï¿½s ï¿½ une mï¿½me figure soient au mï¿½me index dans toutes les listes
 		Dans l'ordre :	- on instancie la figure
-						- on l'ajoute à la liste des figures
-						- on génère son buffer qu'on ajoute à la liste des buffers
-						- on créé sa matrice sans prendre en compte le scaling par souci de simplification
-						- on ajoute sa matrice à la liste des matrices. Attention à l'ordre des matrices. Chaque matrice doit dépendre de la matrice à sa gauche, la caméra étant le référentiel absolu
+						- on l'ajoute ï¿½ la liste des figures
+						- on gï¿½nï¿½re son buffer qu'on ajoute ï¿½ la liste des buffers
+						- on crï¿½ï¿½ sa matrice sans prendre en compte le scaling par souci de simplification
+						- on ajoute sa matrice ï¿½ la liste des matrices. Attention ï¿½ l'ordre des matrices. Chaque matrice doit dï¿½pendre de la matrice ï¿½ sa gauche, la camï¿½ra ï¿½tant le rï¿½fï¿½rentiel absolu
 
-		On ne scale qu'une fois tous les objets créés afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils dépendent
-		On créé un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhaité.
-		Attention, par défaut un cylindre fait face à la caméra et ses faces plates sont invisibles.
-		On retrouvera un angle par défaut sur les figures représentant les épaules, coudes, cuisses et genoux car ce sont des articulations dans notre modèle
-		A l'exception des angles qui sont calculés selon les données du TP, toutes les valeurs ont été trouvées par tatonnements
+		On ne scale qu'une fois tous les objets crï¿½ï¿½s afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils dï¿½pendent
+		On crï¿½ï¿½ un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhaitï¿½.
+		Attention, par dï¿½faut un cylindre fait face ï¿½ la camï¿½ra et ses faces plates sont invisibles.
+		On retrouvera un angle par dï¿½faut sur les figures reprï¿½sentant les ï¿½paules, coudes, cuisses et genoux car ce sont des articulations dans notre modï¿½le
+		A l'exception des angles qui sont calculï¿½s selon les donnï¿½es du TP, toutes les valeurs ont ï¿½tï¿½ trouvï¿½es par tatonnements
 	*/
 
-	std::vector <Geometry>	listeFigures;	//liste de toutes les figures créées
-	std::vector <GLuint>	listeBuffer;	//liste des buffers associés aux figures
-	std::vector <glm::mat4> listeMvp;		//liste des matrices associées aux figures
+	std::vector <Geometry>	listeFigures;	//liste de toutes les figures crï¿½ï¿½es
+	std::vector <GLuint>	listeBuffer;	//liste des buffers associï¿½s aux figures
+	std::vector <glm::mat4> listeMvp;		//liste des matrices associï¿½es aux figures
 
 	Cylinder body(32);
 	listeFigures.push_back(body);
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 	Sphere elbow1(32, 32);
 	listeFigures.push_back(elbow1);
 	listeBuffer.push_back(generate(elbow1));
-	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.5f, 1, 0, 0);				// légère inclinaison supplémentaire
+	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.5f, 1, 0, 0);				// lï¿½gï¿½re inclinaison supplï¿½mentaire
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix);
 
 	Cylinder forearm1(32);
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 	uint32_t nbVerticesFlashlight = flashlight_vertices.size();
 	GLuint torchBuffer = NULL; 	// Flashlight buffer
 
-	// cast obligé car flashlight_vertices & flashlight_normal ne sont pas des const float * :
+	// cast obligï¿½ car flashlight_vertices & flashlight_normal ne sont pas des const float * :
 	torchBuffer = createBuffer(torchBuffer, glm::value_ptr(flashlight_vertices[0]), glm::value_ptr(flashlight_normals[0]), nbVerticesFlashlight);
 
 	glm::mat4 matrixTorch = getMatrix(0.0, 0.02, -0.15, (float)M_PI, 0, 1, 0);
@@ -349,15 +349,13 @@ int main(int argc, char *argv[])
 	/////////////////// Lumiere ///////////////////////
 
 	// on se sert des 3 premieres dimensions de cette matrice pour calculer
-	// la position de la lumière au bout du bras (de la lampe prochainement)
+	// la position de la lumiï¿½re au bout du bras (de la lampe prochainement)
 	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
-	tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
 
-	glm::vec3 lightPos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
-
-	// glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);		// yellow tint
-	glm::vec3 lightColorBase = glm::vec3(10.0f, 10.0f, 10.0f);			// white light
-	Light light = Light(lightPos, lightColorBase);				// position custom
+	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
+	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
+	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
+	Light light = Light(lightColorBase, lightColorBase);	//position custom
 
 
 
@@ -376,8 +374,8 @@ int main(int argc, char *argv[])
 
     bool isOpened = true;
 
-	//Ici, on instancie des variables qui vont servir à l'animation
-	int t = 0;	//incrémenté à chaque tour de boucle
+	//Ici, on instancie des variables qui vont servir ï¿½ l'animation
+	int t = 0;	//incrï¿½mentï¿½ ï¿½ chaque tour de boucle
 
 	int side = 1;	//pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
 	int timer = 60; //temps avant le changement de sens de rotation, en tours de boucle
@@ -399,7 +397,7 @@ int main(int argc, char *argv[])
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
-			// Allume/éteint la lumière au clic (prochainement la lampe torche)
+			// Allume/ï¿½teint la lumiï¿½re au clic (prochainement la lampe torche)
 			if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) { light.toogle(); }
 
             switch(event.type)
@@ -434,16 +432,16 @@ int main(int argc, char *argv[])
 							break;
 
 						case SDLK_q:
-							light.pos += glm::vec3(-0.1f, 0.f, 0.f);	// deplace lumière à gauche
+							light.pos += glm::vec3(-0.1f, 0.f, 0.f);	// deplace lumiï¿½re ï¿½ gauche
 							break;
 						case SDLK_d:
-							light.pos += glm::vec3(0.1f, 0.f, 0.f);		// deplace lumière à droite
+							light.pos += glm::vec3(0.1f, 0.f, 0.f);		// deplace lumiï¿½re ï¿½ droite
 							break;
 						case SDLK_z:
-							light.pos += glm::vec3(0.f, 0.1f, 0.f);		// deplace lumière en haut
+							light.pos += glm::vec3(0.f, 0.1f, 0.f);		// deplace lumiï¿½re en haut
 							break;
 						case SDLK_s:
-							light.pos += glm::vec3(0.f, -0.1f, 0.f);	// deplace lumière en bas
+							light.pos += glm::vec3(0.f, -0.1f, 0.f);	// deplace lumiï¿½re en bas
 							break;
 
 
@@ -499,25 +497,25 @@ int main(int argc, char *argv[])
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 
-		// A chaque tour de boucle on décrémente le timer
+		// A chaque tour de boucle on dï¿½crï¿½mente le timer
 		if (timer > 0) {
 			timer--;
 			if (timer == 0) {
 				side = -side; //on change le sens de rotation
-				timer = 60; //on réinitialise le timer
+				timer = 60; //on rï¿½initialise le timer
 			}
 		}
 
 		//////////////////////////////////// Operations on matrices ////////////////////////////////////
 
-		// On réinitialise les données de la figure principale (le corps)
+		// On rï¿½initialise les donnï¿½es de la figure principale (le corps)
 		bodyMatrix = getMatrix(0, -0.3, 0, -M_PI / 2.f, 1, 0, 0);
 
 
 		/*
-			Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-même
+			Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-mï¿½me
 
-			NOTE : Utile plus tard pour le déplacement du personnage ?
+			NOTE : Utile plus tard pour le dï¿½placement du personnage ?
 		 */
 		//glm::mat4 bodyMatrixRot = glm::rotate(headMatrix, (t++) / 60.0f, glm::vec3(0, 0, 1));
 		//bodyMatrix = bodyMatrix * bodyMatrixRot;
@@ -542,8 +540,11 @@ int main(int argc, char *argv[])
 
 		// listeMvp[6] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix *  torchMatrix ????;
 		// Ici futur emplacement de la lampe
-		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * tempoMat);
-		light.pos = glm::vec3(tempoMat[0][0], tempoMat[1][1], tempoMat[2][2]);
+		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix);
+		light.pos = tempoMat[3];
+
+    	// Affichage des positions de la lumiï¿½re
+		printf("pos: x: %d, y: %d, z: %d\n", (tempoMat[3]).x, (tempoMat[3]).y, (tempoMat[3]).z);
 
 
 		// BRAS GAUCHE (AU REPOS)
@@ -556,18 +557,18 @@ int main(int argc, char *argv[])
 
 		// Bas du corps
 		/*
-			TODO : Conditionner le mouvement des jambes à l'avancement du personnage
-					(une fois que le déplacement du personnage sera géré)
+			TODO : Conditionner le mouvement des jambes ï¿½ l'avancement du personnage
+					(une fois que le dï¿½placement du personnage sera gï¿½rï¿½)
 		 */
-		//thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
+		// thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[10] = cameraMatrix * bodyMatrix * thigh1Matrix;
-		//knee1Matrix = glm::rotate(knee1Matrix, -side * (float) M_PI / 540.f, glm::vec3(1, 0, 0));
+		// knee1Matrix = glm::rotate(knee1Matrix, -side * (float) M_PI / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[11] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix;
 		listeMvp[12] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix * leg1Matrix;
 		listeMvp[13] = cameraMatrix * bodyMatrix * thigh1Matrix * knee1Matrix * leg1Matrix * foot1Matrix;
-		//thigh2Matrix = glm::rotate(thigh2Matrix, side *(float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
+		// thigh2Matrix = glm::rotate(thigh2Matrix, side *(float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[14] = cameraMatrix * bodyMatrix * thigh2Matrix;
-		//knee2Matrix = glm::rotate(knee2Matrix, side *(float)M_PI / 540.f, glm::vec3(1, 0, 0));
+		// knee2Matrix = glm::rotate(knee2Matrix, side *(float)M_PI / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[15] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix;
 		listeMvp[16] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix;
 		listeMvp[17] = cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix * foot2Matrix;

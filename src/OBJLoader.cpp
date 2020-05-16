@@ -1,4 +1,5 @@
 #include "OBJLoader.h"
+#include <string>
 
 // Recopié sur http://www.opengl-tutorial.org/fr/beginners-tutorials/tutorial-7-model-loading/
 
