@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
 	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
-	Light light = Light(lightColorBase, lightColorBase);	//position custom
+	Light light = Light(glm::vec3(1.0), lightColorBase);	//position custom
 
 
 

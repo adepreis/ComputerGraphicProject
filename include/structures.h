@@ -16,6 +16,7 @@ struct Material
 
 	Material(glm::vec3 c) {
 		color = c;
+		alpha = 0.3f;
 	}
 
 	Material(glm::vec3 c, float kd, float ka, float ks, float alpha) {
