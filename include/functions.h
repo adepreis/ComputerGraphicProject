@@ -34,7 +34,7 @@ void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Ma
 //affiche (dans le terminal) les touches utiles et leurs fonctions
 void displayCommands();
 
-//retourne une texture à partir du chemin donné
+//retourne une texture a partir du chemin donné
 GLuint createTexture(const char* path);
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "Geometry.h"
 
+// Représente 3 murs decrivant un 'U', l environnement de notre scene
 class Wall : public Geometry
 {
     public:

@@ -1,12 +1,12 @@
-//SDL Libraries
+// SDL Libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-//OpenGL Libraries
+// OpenGL Libraries
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-//GML libraries
+// GML libraries
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
@@ -26,11 +26,11 @@
 
 #include "Wall.h"
 
-//libraries suppl�mentaires
+// libraries supplementaires
 #include "vector"
 #include "math.h"
 
-//On d�finit une fen�tre carr�e pour �viter tout probl�me de rotation ou scaling.
+// On definit une fenetre carree pour eviter tout probleme de rotation ou scaling.
 #define WIDTH     700
 #define HEIGHT    700
 #define FRAMERATE 60
@@ -39,50 +39,50 @@
 
 int main(int argc, char *argv[])
 {
-    ////////////////////////////////////////
-    //SDL2 / OpenGL Context initialization : 
-    ////////////////////////////////////////
+    /////////////////////////////////////////
+    // SDL2 / OpenGL Context initialization : 
+    /////////////////////////////////////////
     
-    //Initialize SDL2
+    // Initialize SDL2
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
     {
         ERROR("The initialization of the SDL failed : %s\n", SDL_GetError());
         return 0;
     }
 
-	//Init the IMG component
+	// Init the IMG component
 	if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
 	{
 		ERROR("Could not load SDL2_image with PNG files\n");
 		return EXIT_FAILURE;
 	}
 
-    //Create a Window
-    SDL_Window* window = SDL_CreateWindow("FPS Flashlight - Projet Info Graphique",		//Titre
-                                          SDL_WINDOWPOS_UNDEFINED,               //X Position
-                                          SDL_WINDOWPOS_UNDEFINED,               //Y Position
-                                          WIDTH, HEIGHT,                         //Resolution
-                                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN); //Flags (OpenGL + Show)
+    // Create a Window
+    SDL_Window* window = SDL_CreateWindow("FPS Flashlight - Projet Info Graphique",		// Titre
+                                          SDL_WINDOWPOS_UNDEFINED,               // X Position
+                                          SDL_WINDOWPOS_UNDEFINED,               // Y Position
+                                          WIDTH, HEIGHT,                         // Resolution
+                                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN); // Flags (OpenGL + Show)
 
-    //Initialize OpenGL Version (version 3.0)
+    // Initialize OpenGL Version (version 3.0)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    //Initialize the OpenGL Context (where OpenGL resources (Graphics card resources) lives)
+    // Initialize the OpenGL Context (where OpenGL resources (Graphics card resources) lives)
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
-    //Tells GLEW to initialize the OpenGL function with this version
+    // Tells GLEW to initialize the OpenGL function with this version
     glewExperimental = GL_TRUE;
     glewInit();
 
 
-    //Start using OpenGL to draw something on screen
-    glViewport(0, 0, WIDTH, HEIGHT); //Draw on ALL the screen
+    // Start using OpenGL to draw something on screen
+    glViewport(0, 0, WIDTH, HEIGHT); // Draw on ALL the screen
 
-    //The OpenGL background color (RGBA, each component between 0.0f and 1.0f)
-	//glClearColor(0.0, 0.0, 0.0, 1.0);			// Full Black
+    // The OpenGL background color (RGBA, each component between 0.0f and 1.0f)
+	// glClearColor(0.0, 0.0, 0.0, 1.0);			// Full Black
 	glClearColor(0.2, 0.2, 0.2, 1.0);			// Light grey
-	//glClearColor(128.0, 0.0, 128.0, 1.0);		// Pink
+	// glClearColor(128.0, 0.0, 128.0, 1.0);		// Pink
 
     glEnable(GL_DEPTH_TEST);	// Active the depth test
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 	std::vector<glm::vec2> flashlight_uvs;
 	std::vector<glm::vec3> flashlight_normals; // Won't be used at the moment.
 
-	// Resultat de l'importation du mod�le de lampe torche :
+	// Resultat de l'importation du modele de lampe torche :
 	bool resTorch = false;
 
 	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
@@ -133,8 +133,6 @@ int main(int argc, char *argv[])
 	// glEnd();
 
 
-	// =========================== Backgroung (& floor ?) ==============================================
-
 	// =========================== Texture loading ==============================================
 	GLuint textureMercure = createTexture("../../Images/mercure.png");
 	GLuint textureWall = createTexture("../../Images/wall.jpg");
@@ -142,42 +140,43 @@ int main(int argc, char *argv[])
 
 
 	/*
-		Matrice de la cam�ra
+		Matrice de la camera
 	*/
 	glm::mat4 cameraMatrix(1.0f);
 
-	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derri�re le perso
+	cameraMatrix = glm::rotate(cameraMatrix, (float)M_PI, glm::vec3(0, 1, 0));				// place la cam derriere le perso
 	// cameraMatrix = glm::rotate(cameraMatrix, -0.5f*(float)M_PI, glm::vec3(1, 0, 0));		// place la cam au dessus
 	// cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.f, 0.f, 1.0f));				// tentative de reculer la cam
 
 
+	// =========================== Background ==============================================
 	// Background wall
 	glm::mat4 matrixWall = scaleMatrix(1.8f, 1.8f, 1.5f);
 
-	matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cot�s
-	matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.3f, 0.1f));			// abaisse + recule leg�rement par rapport au perso
+	matrixWall = glm::rotate(matrixWall, 0.99f*(float)M_PI, glm::vec3(0, 1, 0));	// rot y : mur au fond : 2 murs sur les cotes
+	matrixWall = glm::translate(matrixWall, glm::vec3(0.f, -0.3f, 0.1f));			// abaisse + recule legerement par rapport au perso
 
 	glm::mat4 mvpWall = cameraMatrix * matrixWall;
 
 	/*
-		Ici, on va cr�er une par une toutes les figures qui composent notre personnage
-			- ATTENTION : on veillera � ce que tous les objets li�s � une m�me figure soient au m�me index dans toutes les listes
+		Ici, on va creer une par une toutes les figures qui composent notre personnage
+			- ATTENTION : on veillera a ce que tous les objets lies a une meme figure soient au meme index dans toutes les listes
 		Dans l'ordre :	- on instancie la figure
-						- on l'ajoute � la liste des figures
-						- on g�n�re son buffer qu'on ajoute � la liste des buffers
-						- on cr�� sa matrice sans prendre en compte le scaling par souci de simplification
-						- on ajoute sa matrice � la liste des matrices. Attention � l'ordre des matrices. Chaque matrice doit d�pendre de la matrice � sa gauche, la cam�ra �tant le r�f�rentiel absolu
+						- on l'ajoute a la liste des figures
+						- on genere son buffer qu'on ajoute a la liste des buffers
+						- on cree sa matrice sans prendre en compte le scaling par souci de simplification
+						- on ajoute sa matrice a la liste des matrices. Attention a l'ordre des matrices. Chaque matrice doit dependre de la matrice a sa gauche, la camera etant le referentiel absolu
 
-		On ne scale qu'une fois tous les objets cr��s afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils d�pendent
-		On cr�� un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhait�.
-		Attention, par d�faut un cylindre fait face � la cam�ra et ses faces plates sont invisibles.
-		On retrouvera un angle par d�faut sur les figures repr�sentant les �paules, coudes, cuisses et genoux car ce sont des articulations dans notre mod�le
-		A l'exception des angles qui sont calcul�s selon les donn�es du TP, toutes les valeurs ont �t� trouv�es par tatonnements
+		On ne scale qu'une fois tous les objets crees afin de ne pas avoir besoin d'adapter le scale de tous les objets en fonction de celui des objets dont ils dependent
+		On cree un premier cylindre qui sera le corps de notre personnage, l'angle de -pi / 2 permet d'orienter le cylindre comme souhaite.
+		Attention, par defaut un cylindre fait face a la camera et ses faces plates sont invisibles.
+		On retrouvera un angle par defaut sur les figures representant les epaules, coudes, cuisses et genoux car ce sont des articulations dans notre modele
+		A l'exception des angles qui sont calcules selon les donnees du TP, toutes les valeurs ont ete trouvees par tatonnements
 	*/
 
-	std::vector <Geometry>	listeFigures;	//liste de toutes les figures cr��es
-	std::vector <GLuint>	listeBuffer;	//liste des buffers associ�s aux figures
-	std::vector <glm::mat4> listeMvp;		//liste des matrices associ�es aux figures
+	std::vector <Geometry>	listeFigures;	// liste de toutes les figures creees
+	std::vector <GLuint>	listeBuffer;	// liste des buffers associes aux figures
+	std::vector <glm::mat4> listeMvp;		// liste des matrices associees aux figures
 
 	Cylinder body(32);
 	listeFigures.push_back(body);
@@ -185,8 +184,8 @@ int main(int argc, char *argv[])
 	glm::mat4 bodyMatrix = getMatrix(0, -0.3, 0, -M_PI / 2.f, 1, 0, 0);
 	listeMvp.push_back(cameraMatrix * bodyMatrix);
 
-	Cube head = Cube();
-	// Sphere head(32, 32);
+	Cube head = Cube();			// pas de problème de texture
+	// Sphere head(32, 32);		// problème de texture
 	listeFigures.push_back(head);
 	listeBuffer.push_back(generate(head));
 	glm::mat4 headMatrix = getMatrix(0, 0, 0.55, 0.f, 0, 0, 1);
@@ -207,7 +206,7 @@ int main(int argc, char *argv[])
 	Sphere elbow1(32, 32);
 	listeFigures.push_back(elbow1);
 	listeBuffer.push_back(generate(elbow1));
-	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.5f, 1, 0, 0);				// l�g�re inclinaison suppl�mentaire
+	glm::mat4 elbow1Matrix = getMatrix(0, 0, -0.2, 0.5f, 1, 0, 0);				// legere inclinaison supplementaire
 	listeMvp.push_back(cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix);
 
 	Cylinder forearm1(32);
@@ -221,7 +220,7 @@ int main(int argc, char *argv[])
 	uint32_t nbVerticesFlashlight = flashlight_vertices.size();
 	GLuint torchBuffer = NULL; 	// Flashlight buffer
 
-	// cast oblig� car flashlight_vertices & flashlight_normal ne sont pas des const float * :
+	// cast obligatoire car flashlight_vertices & flashlight_normal ne sont pas des const float * :
 	torchBuffer = createBuffer(torchBuffer, glm::value_ptr(flashlight_vertices[0]), glm::value_ptr(flashlight_normals[0]), nbVerticesFlashlight);
 
 	glm::mat4 matrixTorch = getMatrix(0.0, 0.02, -0.15, (float)M_PI, 0, 1, 0);
@@ -304,7 +303,7 @@ int main(int argc, char *argv[])
 	listeMvp.push_back(cameraMatrix * bodyMatrix * thigh2Matrix * knee2Matrix * leg2Matrix * foot2Matrix);
 
 
-	//on scale tous les objets
+	// on scale tous les objets
 	listeMvp[0] = listeMvp[0] * scaleMatrix(0.5, 0.5, 0.8);
 	listeMvp[1] = listeMvp[1] * scaleMatrix(0.3, 0.3, 0.3);
 	listeMvp[2] = listeMvp[2] * scaleMatrix(0.2, 0.2, 0.2);
@@ -328,7 +327,7 @@ int main(int argc, char *argv[])
 	mvpTorch = mvpTorch * scaleMatrix(0.03, 0.03, 0.03);
 
     
-	//On charge les fichiers relatifs aux shaders
+	// On charge les fichiers relatifs aux shaders
     FILE* vertFile = fopen("Shaders/color.vert", "r");
     FILE* fragFile = fopen("Shaders/color.frag", "r");
     if (vertFile == NULL || fragFile == NULL) {
@@ -348,14 +347,14 @@ int main(int argc, char *argv[])
 
 	/////////////////// Lumiere ///////////////////////
 
-	// on se sert des 3 premieres dimensions de cette matrice pour calculer
-	// la position de la lumi�re au bout du bras (de la lampe prochainement)
+	// on se sert de cette matrice pour calculer
+	// la position de la lumiere au bout du bras
 	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
 
 	glm::vec3 lightColorBase = glm::vec3(1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
-	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
-	Light light = Light(glm::vec3(1.0), lightColorBase);	//position custom
+	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);				// yellow light
+	Light light = Light(glm::vec3(1.0), lightColorBase);	// position custom
 
 
 
@@ -367,6 +366,7 @@ int main(int argc, char *argv[])
 	Material wallMaterial = Material(glm::vec3(0.58f, 0.4f, 0.42f));
 
 	// TODO : parse the Flashlight.mtl to retrieve Ka, Kd, Ks ???
+
 	// Light grey Torch's material
 	Material torchMat = Material(glm::vec3(0.08f, 0.08f, 0.08f), 0.f, 0.5f, 1.f, 250.f);
 
@@ -374,30 +374,30 @@ int main(int argc, char *argv[])
 
     bool isOpened = true;
 
-	//Ici, on instancie des variables qui vont servir � l'animation
-	int t = 0;	//incr�ment� � chaque tour de boucle
+	// Ici, on instancie des variables qui vont servir a l'animation
+	int t = 0;	// incremente a chaque tour de boucle
 
-	int side = 1;	//pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
-	int timer = 60; //temps avant le changement de sens de rotation, en tours de boucle
+	int side = 1;	// pour changer le sens de rotation ( side * angle ) ; side inclus dans {-1, 1}
+	int timer = 60; // temps avant le changement de sens de rotation, en tours de boucle
 
-	int amplitudeArmLR, amplitudeArmUD = 50; //pour limiter rotation du bras en x et en y ; compris dans [0,100]
+	int amplitudeArmLR, amplitudeArmUD = 50; // pour limiter rotation du bras en x et en y ; compris dans [0,100]
 
 	displayCommands();
 
-    //Main application loop
+    // Main application loop
     while(isOpened)
     {
-        //Time in ms telling us when this frame started. Useful for keeping a fix framerate
+        // Time in ms telling us when this frame started. Useful for keeping a fix framerate
         uint32_t timeBegin = SDL_GetTicks();
 
-		//pour changer dir gauche/droite et haut/bas du bras ; inclus dans {-1, 0, 1}
+		// pour changer dir gauche/droite et haut/bas du bras ; inclus dans {-1, 0, 1}
 		int armDirectionLR, armDirectionUD = 0;
 
-        //Fetch the SDL events
+        // Fetch the SDL events
         SDL_Event event;
         while(SDL_PollEvent(&event))
         {
-			// Allume/�teint la lumi�re au clic (prochainement la lampe torche)
+			// Allume/eteint la lumiere de la lampe au clic
 			if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) { light.toogle(); }
 
             switch(event.type)
@@ -432,16 +432,16 @@ int main(int argc, char *argv[])
 							break;
 
 						case SDLK_q:
-							light.pos += glm::vec3(-0.1f, 0.f, 0.f);	// deplace lumi�re � gauche
+							light.pos += glm::vec3(-0.1f, 0.f, 0.f);	// deplace lumiere a gauche
 							break;
 						case SDLK_d:
-							light.pos += glm::vec3(0.1f, 0.f, 0.f);		// deplace lumi�re � droite
+							light.pos += glm::vec3(0.1f, 0.f, 0.f);		// deplace lumiere a droite
 							break;
 						case SDLK_z:
-							light.pos += glm::vec3(0.f, 0.1f, 0.f);		// deplace lumi�re en haut
+							light.pos += glm::vec3(0.f, 0.1f, 0.f);		// deplace lumiere en haut
 							break;
 						case SDLK_s:
-							light.pos += glm::vec3(0.f, -0.1f, 0.f);	// deplace lumi�re en bas
+							light.pos += glm::vec3(0.f, -0.1f, 0.f);	// deplace lumiere en bas
 							break;
 
 
@@ -493,32 +493,32 @@ int main(int argc, char *argv[])
             }
         }
 
-        //Clear the screen : the depth buffer and the color buffer
+        // Clear the screen : the depth buffer and the color buffer
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 
-		// A chaque tour de boucle on d�cr�mente le timer
+		// A chaque tour de boucle on decremente le timer
 		if (timer > 0) {
 			timer--;
 			if (timer == 0) {
-				side = -side; //on change le sens de rotation
-				timer = 60; //on r�initialise le timer
+				side = -side; 	// on change le sens de rotation
+				timer = 60; 	// on reinitialise le timer
 			}
 		}
 
 		//////////////////////////////////// Operations on matrices ////////////////////////////////////
 
-		// On r�initialise les donn�es de la figure principale (le corps)
+		// On reinitialise les donnees de la figure principale (le corps)
 		bodyMatrix = getMatrix(0, -0.3, 0, -M_PI / 2.f, 1, 0, 0);
 
 
 		/*
-			Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-m�me
+			Ces deux lignes ne sont pas obligatoires, elles permettent de faire tourner le personnage sur lui-meme
 
-			NOTE : Utile plus tard pour le d�placement du personnage ?
+			NOTE : Utile plus tard pour le deplacement du personnage ?
 		 */
-		//glm::mat4 bodyMatrixRot = glm::rotate(headMatrix, (t++) / 60.0f, glm::vec3(0, 0, 1));
-		//bodyMatrix = bodyMatrix * bodyMatrixRot;
+		// glm::mat4 bodyMatrixRot = glm::rotate(headMatrix, (t++) / 60.0f, glm::vec3(0, 0, 1));
+		// bodyMatrix = bodyMatrix * bodyMatrixRot;
 
 
 
@@ -538,13 +538,9 @@ int main(int argc, char *argv[])
 		listeMvp[5] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix;
 
 
-		// listeMvp[6] = cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix *  torchMatrix ????;
-		// Ici futur emplacement de la lampe
-		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix);
+		// Emplacement de la lumière de la lampe
+		tempoMat = (cameraMatrix * bodyMatrix * shoulder1Matrix * arm1Matrix * elbow1Matrix * forearm1Matrix * matrixTorch);
 		light.pos = tempoMat[3];
-
-    	// Affichage des positions de la lumi�re
-		// printf("pos: x: %d, y: %d, z: %d\n", (tempoMat[3]).x, (tempoMat[3]).y, (tempoMat[3]).z);
 
 
 		// BRAS GAUCHE (AU REPOS)
@@ -557,8 +553,8 @@ int main(int argc, char *argv[])
 
 		// Bas du corps
 		/*
-			TODO : Conditionner le mouvement des jambes � l'avancement du personnage
-					(une fois que le d�placement du personnage sera g�r�)
+			TODO : Conditionner le mouvement des jambes a l'avancement du personnage
+					(une fois que le deplacement du personnage sera gere)
 		 */
 		// thigh1Matrix = glm::rotate(thigh1Matrix, -side * (float)(2 * M_PI) / 540.f, glm::vec3(1, 0, 0));
 		listeMvp[10] = cameraMatrix * bodyMatrix * thigh1Matrix;
@@ -644,18 +640,18 @@ int main(int argc, char *argv[])
         glUseProgram(0);
 
 
-        //Display on screen (swap the buffer on screen and the buffer you are drawing on)
+        // Display on screen (swap the buffer on screen and the buffer you are drawing on)
         SDL_GL_SwapWindow(window);
 
-        //Time in ms telling us when this frame ended. Useful for keeping a fix framerate
+        // Time in ms telling us when this frame ended. Useful for keeping a fix framerate
         uint32_t timeEnd = SDL_GetTicks();
 
-        //We want FRAMERATE FPS
+        // We want FRAMERATE FPS
         if(timeEnd - timeBegin < TIME_PER_FRAME_MS)
             SDL_Delay(TIME_PER_FRAME_MS - (timeEnd - timeBegin));
     }
     
-    //Free everything
+    // Free everything
 	delete shader;
 	for each (GLuint buff in listeBuffer)
 	{

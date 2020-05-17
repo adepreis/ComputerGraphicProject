@@ -62,21 +62,16 @@ Now you could run the project after clicking the 'Start' button.
 
 There you are!
 
-> ~~Note : Textures have to be in the `/build/bin/Images` folder !~~
-
-> ~~Note : Objects have to be in the `/build/bin/Models` folder !~~
-
-
 ---
 
 ## Commands :
 No controller needed, only a keyboard and a mouse.
 
 To interact with our project, the keys to use are :
-- `z` : move forward
-- `s` : move backward
-- `q` : move sideways to the left
-- `d` : move sideways to the right
+- ~~`z` : move forward~~
+- ~~`s` : move backward~~
+- ~~`q` : move sideways to the left~~
+- ~~`d` : move sideways to the right~~
 - `Left Click` on the mouse to turn on/off the flashlight
 - You control the arm with your mouse cursor
 
@@ -84,15 +79,14 @@ To interact with our project, the keys to use are :
 
 ## Built With
 
-* [cmake](https://cmake.org/) - Open-source cross-platform tool designed to build, test and package software.
-* [VisualStudio 2017](https://visualstudio.microsoft.com/fr/vs/) - IDE used
-* [OpenGL](https://www.opengl.org/) (version 3.0) - 2D and 3D graphics API
+- [cmake](https://cmake.org/) - Open-source cross-platform tool designed to build, test and package software.
+- [VisualStudio 2017](https://visualstudio.microsoft.com/fr/vs/) - IDE used
+- [OpenGL](https://www.opengl.org/) (version 3.0) - 2D and 3D graphics API
 
 ## Authors
 
-* **B Lucas** - *Debuggage, vue FPS (?)* - @0xWryth
-* **D Antonin** - *Importation modèle torche, controls, murs, texture* - @adepreis
-* ~~**D Guillaume** - *work description* - @gdescomps~~
+* **B Lucas** - *Debugging, FPS view attempt* - @0xWryth
+* **D Antonin** - *Flashlight model import, controls, walls, texturing* - @adepreis
 
 ---
 
@@ -101,5 +95,5 @@ To interact with our project, the keys to use are :
 * [Tobias isenberg](http://tobias.isenberg.cc/) - computer graphics instructor
 * Mickaël Sereno - PhD student in charge of computer graphics TPs
 * SDL 2.0 Library [wiki](https://wiki.libsdl.org/)
-* [Tutoriel : Charger un modèle 3D](http://www.opengl-tutorial.org/fr/beginners-tutorials/tutorial-7-model-loading/)
+* [FR] Tutoriel : [Charger un modèle 3D](http://www.opengl-tutorial.org/fr/beginners-tutorials/tutorial-7-model-loading/)
 * [thebookofshaders](https://thebookofshaders.com/)

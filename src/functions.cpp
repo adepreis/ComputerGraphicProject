@@ -126,6 +126,8 @@ void draw(GLuint buffer, uint32_t figVertices, Shader* shader, glm::mat4 mvp, Ma
 void displayCommands()
 {
 	/*
+		(TODO : quand le personnage pourra se deplacer :)
+
 		To interact with our poject, the keys to use are :
 		- `z` : move forward
 		- `s` : move backward

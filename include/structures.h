@@ -4,6 +4,7 @@
 //GML library
 #include <glm/glm.hpp>
 
+// Represente un type de matériau.
 struct Material
 {
 	glm::vec3 color = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -30,6 +31,7 @@ struct Material
 	}
 };
 
+// Represente un type de lumière.
 struct Light
 {
 public:
