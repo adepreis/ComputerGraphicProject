@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
 	// la position de la lumi�re au bout du bras (de la lampe prochainement)
 	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
 
-	glm::vec3 lightColorBase = glm::vec3(255.0f, 211.0f, 1.0f);
+	glm::vec3 lightColorBase = glm::vec3(1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), lightColorBase);	//yellow light
 	Light light = Light(glm::vec3(1.0), lightColorBase);	//position custom
@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
 		light.pos = tempoMat[3];
 
     	// Affichage des positions de la lumi�re
-		printf("pos: x: %d, y: %d, z: %d\n", (tempoMat[3]).x, (tempoMat[3]).y, (tempoMat[3]).z);
+		// printf("pos: x: %d, y: %d, z: %d\n", (tempoMat[3]).x, (tempoMat[3]).y, (tempoMat[3]).z);
 
 
 		// BRAS GAUCHE (AU REPOS)
