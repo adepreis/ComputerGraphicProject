@@ -349,7 +349,8 @@ int main(int argc, char *argv[])
 
 	// on se sert de cette matrice pour calculer
 	// la position de la lumiere au bout du bras
-	glm::mat4 tempoMat = getMatrix(0, 0, -0.2, 0, 1, 0, 0);
+	glm::mat4 tempoMat = getMatrix(0.0, 0.02, -0.9, (float)M_PI, 0, 1, 0);
+	tempoMat = glm::rotate(tempoMat, -0.5f, glm::vec3(1, 0, 0));
 
 	glm::vec3 lightColorBase = glm::vec3(1.0f);
 	// Light light = Light(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));	// white light

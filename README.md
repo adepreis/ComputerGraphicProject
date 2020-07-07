@@ -1,6 +1,8 @@
-# Computer Graphics Project
+# FPS Flashlight
 
-Polytech ET3 IT - Noted project for S6
+Polytech ET3 IT - Computer Graphics noted project for S6 (2020)
+
+![Illustration : application screenshot](./Screenshot-30062020.png)
 
 ## Objectives
 
