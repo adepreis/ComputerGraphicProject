@@ -2,7 +2,7 @@
 
 Polytech ET3 IT - Computer Graphics noted project for S6 (2020)
 
-![Illustration : application screenshot](./Screenshot-30062020.png)
+![Illustration : application preview](./animation.gif)
 
 ## Objectives
 

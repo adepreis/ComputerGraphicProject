@@ -97,13 +97,13 @@ int main(int argc, char *argv[])
 	bool resTorch = false;
 
 	/* This model is not adapted to our parser (but could offer more options (nMap, texture,...) : */
-	// resTorch = loadOBJ("../../Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	// resTorch = loadOBJ("./Models/flashlight_model/flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
 	/* This model is just a test model adapted to our parser : */
-	// resTorch = loadOBJ("../../Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	// resTorch = loadOBJ("./Models/cube_test.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
 	/* This one is a adapted model using Blender : */
-	resTorch = loadOBJ("../../Models/flashLight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
+	resTorch = loadOBJ("./Models/flashlight/Flashlight.obj", flashlight_vertices, flashlight_uvs, flashlight_normals);
 
 	if (!resTorch)
 	{
@@ -134,9 +134,9 @@ int main(int argc, char *argv[])
 
 
 	// =========================== Texture loading ==============================================
-	GLuint textureMercure = createTexture("../../Images/mercure.png");
-	GLuint textureWall = createTexture("../../Images/wall.jpg");
-	GLuint textureTorch = createTexture("../../Images/steel.jpg");
+	GLuint textureMercure = createTexture("./Images/mercure.png");
+	GLuint textureWall = createTexture("./Images/wall.jpg");
+	GLuint textureTorch = createTexture("./Images/steel.jpg");
 
 
 	/*
