@@ -1,0 +1,2 @@
+# Excludes vendor external resources/dependencies of the repository's language statistics #
+libs/* linguist-vendored
